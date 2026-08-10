@@ -60,11 +60,11 @@ export function EventsSearchForm({
         <Input
           ref={inputRef}
           id="events-search"
-          type="search"
+          type="text"
           placeholder="Search events…"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          className="h-9 pl-8 pr-8 text-sm [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
+          className="h-9 pl-8 pr-8 text-sm"
           autoComplete="off"
         />
         {value && (
