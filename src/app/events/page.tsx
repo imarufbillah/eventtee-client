@@ -82,7 +82,7 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
   const fetchError = false; // see plan note — requires api-server.ts update to distinguish
 
   return (
-    <div className="flex min-h-[calc(100dvh-4rem)] flex-col">
+    <div className="flex min-h-dvh flex-col pt-16">
       <EventsPageHeader
         total={eventsData.total}
         search={search}

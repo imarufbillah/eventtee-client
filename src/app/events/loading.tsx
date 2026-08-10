@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
  */
 export default function EventsLoading() {
   return (
-    <div className="flex min-h-[calc(100dvh-4rem)] flex-col">
+    <div className="flex min-h-dvh flex-col pt-16">
       {/* Page header band skeleton */}
       <div className="border-b border-border/60 bg-background/95">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
