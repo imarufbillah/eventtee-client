@@ -1,43 +1,64 @@
 import Link from "next/link";
-import { ArrowUpRight, Layers } from "lucide-react";
+import { ArrowUpRight, Sparkles } from "lucide-react";
 import type { Category } from "@/lib/types";
-import { getCategoryGradient } from "@/lib/utils";
+import { cn, getCategoryAccent } from "@/lib/utils";
 
 interface CategoryCardProps {
   category: Category;
+  index?: number;
+  className?: string;
 }
 
-export function CategoryCard({ category }: CategoryCardProps) {
-  const gradient = getCategoryGradient(category.slug);
+export function CategoryCard({ category, className }: CategoryCardProps) {
+  const accent = getCategoryAccent(category.slug);
+  const count = category._count?.events ?? 0;
 
   return (
     <Link
       href={`/events?category=${category.slug}`}
-      className="group relative flex flex-col justify-between rounded-2xl border border-border/60 bg-muted/30 p-1.5 transition-all duration-300 hover:border-primary/40 hover:bg-muted/50 dark:border-border/40 dark:bg-card/40"
+      className={cn(
+        "group relative flex h-full min-h-[140px] flex-col justify-between overflow-hidden rounded-xl border border-border/70 p-5 transition-[transform,border-color,background-color] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]",
+        "bg-card hover:border-primary/40 active:scale-[0.99]",
+        accent.tint,
+        className
+      )}
     >
-      <div className="relative flex h-full flex-col justify-between overflow-hidden rounded-[0.875rem] border border-border/40 bg-background/90 p-5 backdrop-blur-xs transition-colors dark:bg-background/60">
-        <div
-          className={`absolute inset-0 bg-linear-to-br ${gradient} opacity-20 transition-opacity duration-300 group-hover:opacity-35`}
-        />
+      <div className="flex items-start justify-between gap-3">
+        <span
+          className={cn(
+            "flex size-7 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary transition-transform duration-200 group-hover:scale-105"
+          )}
+        >
+          <Sparkles className="size-3.5" aria-hidden />
+        </span>
+        <span
+          className={cn(
+            "flex size-8 items-center justify-center rounded-full border border-border/60 bg-background/80 text-muted-foreground transition-[transform,background-color,color] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]",
+            "group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary"
+          )}
+        >
+          <ArrowUpRight
+            className="size-3.5 transition-transform duration-300 group-hover:translate-x-px group-hover:-translate-y-px"
+            aria-hidden
+          />
+        </span>
+      </div>
 
-        <div className="relative z-10 flex items-center justify-between">
-          <div className="flex size-10 items-center justify-center rounded-xl border border-border/50 bg-background/80 text-primary shadow-xs transition-transform duration-300 group-hover:scale-110">
-            <Layers className="size-5" />
-          </div>
-          <span className="flex size-7 items-center justify-center rounded-full bg-muted/80 text-muted-foreground transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-            <ArrowUpRight className="size-4" />
-          </span>
-        </div>
-
-        <div className="relative z-10 mt-6">
-          <h4 className="font-bold text-foreground text-lg tracking-tight group-hover:text-primary transition-colors">
-            {category.name}
-          </h4>
-          <p className="mt-1 text-xs text-muted-foreground font-mono">
-            {category._count?.events ?? 0} active{" "}
-            {category._count?.events === 1 ? "event" : "events"}
-          </p>
-        </div>
+      <div className="mt-6 space-y-1">
+        <h3
+          className={cn(
+            "font-display text-xl font-bold tracking-tight text-foreground transition-colors duration-200 sm:text-2xl",
+            "group-hover:text-primary"
+          )}
+        >
+          {category.name}
+        </h3>
+        <p className="font-mono text-xs text-muted-foreground">
+          <span className={cn("font-semibold tabular-nums", accent.ink)}>
+            {count}
+          </span>{" "}
+          {count === 1 ? "live event" : "live events"}
+        </p>
       </div>
     </Link>
   );
