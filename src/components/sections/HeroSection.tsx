@@ -118,10 +118,10 @@ export function HeroSection({
                 <Button
                   type="submit"
                   size="lg"
-                  className="h-11 w-full shrink-0 gap-2 rounded-lg px-5 font-semibold sm:w-auto active:scale-[0.98]"
+                  className="group/search-btn h-11 w-full shrink-0 gap-2 rounded-lg px-5 font-semibold transition-all duration-300 ease-out-expo hover:gap-3 sm:w-auto active:scale-[0.98]"
                 >
                   <span>Find events</span>
-                  <span className="flex size-6 items-center justify-center rounded-full bg-primary-foreground/15">
+                  <span className="flex size-6 items-center justify-center rounded-full bg-primary-foreground/15 transition-transform duration-300 ease-out-expo group-hover/search-btn:translate-x-0.5">
                     <ArrowRight className="size-3.5" data-icon="inline-end" />
                   </span>
                 </Button>
@@ -177,7 +177,7 @@ export function HeroSection({
                   <button
                     type="button"
                     onClick={(e) => handleSearchSubmit(e)}
-                    className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-xs font-medium text-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                    className="group/search-action flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-xs font-medium text-foreground hover:bg-primary/10 hover:text-primary transition-colors"
                   >
                     <span className="flex items-center gap-2">
                       <Search className="size-3.5 text-primary" />
@@ -189,7 +189,7 @@ export function HeroSection({
                         &quot;
                       </span>
                     </span>
-                    <ArrowRight className="size-3.5" />
+                    <ArrowRight className="size-3.5 transition-transform duration-300 ease-out-expo group-hover/search-action:translate-x-0.5" />
                   </button>
                 </motion.div>
               )}
