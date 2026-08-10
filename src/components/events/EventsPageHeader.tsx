@@ -48,6 +48,7 @@ export function EventsPageHeader({
 
           {/* Search form */}
           <EventsSearchForm
+            key={search}
             defaultValue={search}
             activeCategory={activeCategory}
           />
