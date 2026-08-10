@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Calendar,
@@ -30,12 +31,35 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
+const emptySubscribe = () => () => {};
+
+function useHydrated() {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
+}
+
 export function Header() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [isAtTop, setIsAtTop] = useState(true);
+  const mounted = useHydrated();
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileMenuOpen]);
 
   const user = session?.user;
   const userRole = (user as Record<string, unknown> | undefined)?.role as
@@ -313,31 +337,47 @@ export function Header() {
         </div>
       </div>
 
-      {/* Mobile Menu & Blurred Backdrop Container */}
+      {/* Mobile Backdrop Overlay Portaled to document.body */}
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {mobileMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => setMobileMenuOpen(false)}
+                className="fixed inset-0 z-40 bg-background/80 backdrop-blur-md md:hidden"
+                aria-hidden
+              />
+            )}
+          </AnimatePresence>,
+          document.body,
+        )}
+
+      {/* Mobile Navigation Drawer */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <>
-            {/* Full-Screen Blurred Backdrop Overlay */}
-            <motion.div
-              key="mobile-backdrop"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2, ease: "easeInOut" }}
-              onClick={() => setMobileMenuOpen(false)}
-              className="fixed inset-0 z-40 bg-background/60 backdrop-blur-md md:hidden"
-              aria-hidden
-            />
-
-            {/* Mobile Navigation Drawer */}
-            <motion.div
-              key="mobile-drawer"
-              initial={{ opacity: 0, y: -12, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -12, scale: 0.98 }}
-              transition={{ duration: 0.2, ease: "easeInOut" }}
-              className="relative z-50 md:hidden border-b border-border/50 bg-background/95 px-4 py-4 space-y-4 rounded-b-2xl shadow-2xl max-h-[calc(100vh-5rem)] overflow-y-auto"
-            >
+          <motion.div
+            initial={{
+              opacity: 0,
+              y: -12,
+              scale: 0.98,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              scale: 1,
+            }}
+            exit={{
+              opacity: 0,
+              y: -10,
+              scale: 0.98,
+            }}
+            transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+            className="relative z-50 md:hidden border-b border-border/50 bg-background/95 px-4 py-4 space-y-4 rounded-b-2xl shadow-2xl max-h-[calc(100vh-5rem)] overflow-y-auto"
+          >
           {/* User Profile Header Card (Mobile) */}
           {user && (
             <div className="rounded-xl border border-border/60 bg-muted/40 p-3 space-y-2.5">
@@ -525,9 +565,8 @@ export function Header() {
             )}
           </div>
         </motion.div>
-      </>
-    )}
-  </AnimatePresence>
+      )}
+    </AnimatePresence>
     </header>
   );
 }
