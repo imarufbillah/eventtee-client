@@ -10,7 +10,6 @@ import { CategoryChip } from "@/components/categories/CategoryChip";
 import { EventCard } from "@/components/events/EventCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { formatCurrency, formatTicketDate } from "@/lib/utils";
 
 interface HeroSectionProps {
   categories: Category[];
@@ -44,12 +43,8 @@ export function HeroSection({
 
   const showSuggestions = isFocused && cleanQuery.length > 0;
 
-  const ticket = featuredEvent
-    ? formatTicketDate(featuredEvent.startDate)
-    : null;
-
   return (
-    <section className="relative overflow-hidden border-b border-border/50 pt-24 pb-16 md:pt-28 md:pb-24">
+    <section className="relative flex min-h-dvh flex-col justify-center overflow-hidden border-b border-border/50 pt-24 pb-16 md:pt-28 md:pb-24">
       {/* Soft venue wash */}
       <div
         aria-hidden
@@ -75,7 +70,9 @@ export function HeroSection({
 
           <h1 className="font-display mt-4 max-w-[14ch] text-[clamp(2.5rem,6vw,4.25rem)] font-extrabold leading-[0.98] tracking-[-0.03em] text-foreground">
             Your seat is waiting.{" "}
-            <span className="text-primary">Lock it before someone else does.</span>
+            <span className="text-primary">
+              Lock it before someone else does.
+            </span>
           </h1>
 
           <p className="mt-5 max-w-md text-base leading-relaxed text-muted-foreground sm:text-lg">
@@ -90,7 +87,7 @@ export function HeroSection({
               <label htmlFor="hero-search" className="sr-only">
                 Search events
               </label>
-              <div className="flex flex-col gap-2 rounded-xl border border-border bg-card p-1.5 shadow-[0_1px_0_rgba(0,0,0,0.04)] transition-[border-color,box-shadow] duration-200 focus-within:border-primary/50 focus-within:shadow-[0_0_0_3px_oklch(0.48_0.22_265_/_0.12)] sm:flex-row sm:items-center">
+              <div className="flex flex-col gap-2 rounded-xl border border-border bg-card p-1.5 shadow-[0_1px_0_rgba(0,0,0,0.04)] transition-[border-color,box-shadow] duration-200 focus-within:border-primary/50 focus-within:shadow-[0_0_0_3px_oklch(0.48_0.22_265/0.12)] sm:flex-row sm:items-center">
                 <div className="relative flex flex-1 items-center">
                   <Search
                     className="pointer-events-none absolute left-3.5 size-4 text-muted-foreground"
@@ -206,7 +203,7 @@ export function HeroSection({
                 Jump to a category
               </p>
               <div
-                className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] scrollbar-none [&::-webkit-scrollbar]:hidden"
                 style={{
                   WebkitMaskImage:
                     "linear-gradient(to right, black 85%, transparent 100%)",
@@ -224,7 +221,10 @@ export function HeroSection({
           {/* Product truths + Fee transparency note */}
           <ul className="mt-10 flex flex-wrap gap-x-6 gap-y-2 border-t border-border/60 pt-6 text-xs text-muted-foreground sm:text-sm">
             <li className="flex items-center gap-2">
-              <span className="size-1.5 rounded-full bg-emerald-500" aria-hidden />
+              <span
+                className="size-1.5 rounded-full bg-emerald-500"
+                aria-hidden
+              />
               Atomic seat locking
             </li>
             <li className="flex items-center gap-2">
@@ -243,34 +243,30 @@ export function HeroSection({
           {featuredEvent ? (
             <div className="relative">
               {/* Ambient label */}
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <p className="font-mono text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
-                  On the marquee
-                </p>
-                {ticket && (
-                  <p className="font-mono text-[11px] text-muted-foreground">
-                    {ticket.weekday} · {ticket.month} {ticket.day} ·{" "}
-                    {formatCurrency(featuredEvent.price)}
-                  </p>
-                )}
-              </div>
+              <p className="mb-3 font-mono text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
+                On the marquee
+              </p>
 
-              <EventCard event={featuredEvent} featured className="relative z-10" />
+              <EventCard
+                event={featuredEvent}
+                featured
+                className="relative z-10"
+              />
 
               {/* Depth card behind */}
               <div
                 aria-hidden
-                className="pointer-events-none absolute inset-x-4 top-8 -z-0 hidden h-full rounded-xl border border-border/40 bg-muted/40 sm:block"
+                className="pointer-events-none absolute inset-x-4 top-8 z-0 hidden h-full rounded-xl border border-border/40 bg-muted/40 sm:block"
                 style={{ transform: "translateY(18px) rotate(1.5deg)" }}
               />
               <div
                 aria-hidden
-                className="pointer-events-none absolute inset-x-8 top-8 -z-[1] hidden h-full rounded-xl border border-border/30 bg-muted/25 sm:block"
+                className="pointer-events-none absolute inset-x-8 top-8 z-[-1] hidden h-full rounded-xl border border-border/30 bg-muted/25 sm:block"
                 style={{ transform: "translateY(32px) rotate(-1.25deg)" }}
               />
             </div>
           ) : (
-            <div className="flex min-h-[320px] flex-col justify-between rounded-xl border border-dashed border-border bg-muted/30 p-6 sm:p-8">
+            <div className="flex min-h-80 flex-col justify-between rounded-xl border border-dashed border-border bg-muted/30 p-6 sm:p-8">
               <div>
                 <p className="font-mono text-[11px] tracking-[0.14em] text-muted-foreground uppercase">
                   Marquee empty

@@ -10,7 +10,11 @@ import {
   getCategoryAccent,
 } from "@/lib/utils";
 import { SeatBadge } from "./SeatBadge";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface EventCardProps {
   event: Event;
@@ -19,7 +23,11 @@ interface EventCardProps {
   className?: string;
 }
 
-export function EventCard({ event, featured = false, className }: EventCardProps) {
+export function EventCard({
+  event,
+  featured = false,
+  className,
+}: EventCardProps) {
   const ticket = formatTicketDate(event.startDate);
   const percentBooked = getBookedPercent(event.bookedSeats, event.capacity);
   const accent = getCategoryAccent(event.category?.slug || "");
@@ -28,17 +36,17 @@ export function EventCard({ event, featured = false, className }: EventCardProps
   return (
     <article
       className={cn(
-        "group/ticket relative flex h-full overflow-hidden rounded-xl border border-border/80 bg-card text-card-foreground shadow-[0_1px_0_rgba(0,0,0,0.04)] transition-[transform,box-shadow,border-color] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]",
-        "hover:border-primary/35 hover:shadow-[0_12px_40px_-20px_oklch(0.48_0.22_265_/_0.35)]",
+        "group/ticket relative flex h-full overflow-hidden rounded-xl border border-border/80 bg-card text-card-foreground shadow-[0_1px_0_rgba(0,0,0,0.04)] transition-[transform,box-shadow,border-color] duration-300 ease-out-expo",
+        "hover:border-primary/35 hover:shadow-[0_12px_40px_-20px_oklch(0.48_0.22_265/0.35)]",
         "active:scale-[0.99]",
-        featured && "md:min-h-[280px]",
+        featured && "md:min-h-70",
         className,
       )}
     >
       {/* Date stub — left rail */}
       <div
         className={cn(
-          "relative flex w-[4.5rem] shrink-0 flex-col items-center justify-center border-r border-border/70 px-2 py-5 text-center sm:w-20",
+          "relative flex w-18 shrink-0 flex-col items-center justify-center border-r border-border/70 px-2 py-5 text-center sm:w-20",
           accent.tint,
         )}
       >
@@ -119,7 +127,10 @@ export function EventCard({ event, featured = false, className }: EventCardProps
 
           {event.location && (
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <MapPin className="size-3.5 shrink-0 text-primary/70" aria-hidden />
+              <MapPin
+                className="size-3.5 shrink-0 text-primary/70"
+                aria-hidden
+              />
               <span className="truncate">{event.location}</span>
             </div>
           )}
@@ -164,16 +175,23 @@ export function EventCard({ event, featured = false, className }: EventCardProps
                   {price}
                 </p>
               </TooltipTrigger>
-              <TooltipContent side="top" align="start" className="text-[11px] font-medium shadow-md">
+              <TooltipContent
+                side="top"
+                align="start"
+                className="text-[11px] font-medium shadow-md"
+              >
                 <span>Taxes &amp; all checkout fees included</span>
               </TooltipContent>
             </Tooltip>
-            <span className="relative z-10 inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-xs font-semibold text-primary-foreground transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover/ticket:gap-2.5">
-              Reserve
-              <span className="flex size-5 items-center justify-center rounded-full bg-primary-foreground/15 transition-transform duration-200 group-hover/ticket:translate-x-0.5 group-hover/ticket:-translate-y-px">
+            <Link
+              href={`/events/${event.id}`}
+              className="relative z-10 inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-xs font-semibold text-primary-foreground transition-all duration-300 ease-out-expo group-hover/ticket:gap-2.5"
+            >
+              <span>Reserve</span>
+              <span className="flex size-5 items-center justify-center rounded-full bg-primary-foreground/15 transition-transform duration-300 group-hover/ticket:translate-x-0.5 group-hover/ticket:-translate-y-px">
                 <ArrowUpRight className="size-3" aria-hidden />
               </span>
-            </span>
+            </Link>
           </div>
         </div>
       </div>
