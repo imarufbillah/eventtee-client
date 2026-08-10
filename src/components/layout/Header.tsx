@@ -72,7 +72,7 @@ export function Header() {
       "text-xs font-semibold transition-all duration-200 px-3 py-1.5 rounded-full select-none",
       isActiveRoute(path)
         ? "bg-primary/10 text-primary border border-primary/25 shadow-xs"
-        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+        : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
     );
 
   // Smart Scroll Listener (Hide on scroll down, reveal on scroll up)
@@ -103,17 +103,17 @@ export function Header() {
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 w-full border-b transition-[transform,background-color,border-color,box-shadow] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]",
+        "fixed top-0 left-0 right-0 z-50 w-full border-b transition-[transform,background-color,border-color,box-shadow] duration-300 ease-out-expo",
         isVisible ? "translate-y-0" : "-translate-y-full",
         isAtTop
           ? "border-transparent bg-background/70 backdrop-blur-md"
-          : "border-border/50 bg-background/90 shadow-[0_1px_0_rgba(0,0,0,0.04)] backdrop-blur-xl"
+          : "border-border/50 bg-background/90 shadow-[0_1px_0_rgba(0,0,0,0.04)] backdrop-blur-xl",
       )}
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand Logo */}
         <Link href="/" className="group flex items-center gap-2.5">
-          <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-105 group-active:scale-95">
+          <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-transform duration-200 ease-out-expo group-hover:scale-105 group-active:scale-95">
             <Calendar className="size-4" strokeWidth={1.75} />
           </div>
           <span className="font-display text-lg font-extrabold tracking-tight text-foreground">
@@ -152,7 +152,7 @@ export function Header() {
                 render={
                   <Button
                     variant="ghost"
-                    className="group relative flex items-center gap-2 rounded-full p-1 pl-1.5 pr-2.5 border border-border/50 hover:bg-muted/80 transition-all active:scale-95"
+                    className="group relative flex items-center gap-2 rounded-full p-1 pl-1 pr-2.5 border border-border/50 hover:bg-muted/80 transition-all active:scale-95"
                   />
                 }
               >
@@ -323,7 +323,7 @@ export function Header() {
                 "px-3 py-2 rounded-lg transition-colors flex items-center justify-between",
                 isActiveRoute("/")
                   ? "bg-primary/10 text-primary font-semibold"
-                  : "hover:bg-muted"
+                  : "hover:bg-muted",
               )}
             >
               <span>Home</span>
@@ -338,7 +338,7 @@ export function Header() {
                 "px-3 py-2 rounded-lg transition-colors flex items-center justify-between",
                 isActiveRoute("/events")
                   ? "bg-primary/10 text-primary font-semibold"
-                  : "hover:bg-muted"
+                  : "hover:bg-muted",
               )}
             >
               <span>Browse Events</span>
@@ -354,7 +354,7 @@ export function Header() {
                   "px-3 py-2 rounded-lg transition-colors flex items-center justify-between",
                   isActiveRoute("/dashboard/events/new")
                     ? "bg-primary/15 text-primary font-semibold"
-                    : "bg-primary/10 text-primary hover:bg-primary/20"
+                    : "bg-primary/10 text-primary hover:bg-primary/20",
                 )}
               >
                 <span className="flex items-center gap-2">

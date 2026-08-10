@@ -19,7 +19,7 @@ export function CategoryChip({
     <Link
       href={`/events?category=${category.slug}`}
       className={cn(
-        "inline-flex items-center gap-2 whitespace-nowrap rounded-full border px-3.5 py-2 text-sm font-medium transition-[transform,background-color,border-color,color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] select-none",
+        "inline-flex items-center gap-2 whitespace-nowrap rounded-full border px-3.5 py-2 text-sm font-medium transition-[transform,background-color,border-color,color] duration-200 ease-out-expo select-none",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
         "active:scale-[0.97]",
         isActive

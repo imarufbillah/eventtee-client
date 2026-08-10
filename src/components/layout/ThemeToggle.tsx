@@ -11,7 +11,7 @@ function useHydrated() {
   return useSyncExternalStore(
     emptySubscribe,
     () => true,
-    () => false
+    () => false,
   );
 }
 
@@ -47,4 +47,3 @@ export function ThemeToggle() {
     </Button>
   );
 }
-

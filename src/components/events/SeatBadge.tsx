@@ -35,8 +35,13 @@ export function SeatBadge({
           className,
         )}
       >
-        <span className="size-1.5 animate-pulse rounded-full bg-signal" aria-hidden />
-        {compact ? `${remainingSeats} left` : `Only ${remainingSeats} seats left`}
+        <span
+          className="size-1.5 animate-pulse rounded-full bg-signal"
+          aria-hidden
+        />
+        {compact
+          ? `${remainingSeats} left`
+          : `Only ${remainingSeats} seats left`}
       </span>
     );
   }

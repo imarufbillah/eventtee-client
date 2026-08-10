@@ -32,8 +32,8 @@ export function UpcomingEventsSection({
                 Upcoming on the board
               </h2>
               <p className="mt-3 max-w-lg text-base text-muted-foreground">
-                Real capacity, live remaining seats, and prices you can act on
-                — not a brochure of sold-out hopes.
+                Real capacity, live remaining seats, and prices you can act on —
+                not a brochure of sold-out hopes.
               </p>
             </div>
 

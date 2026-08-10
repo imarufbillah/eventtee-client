@@ -12,7 +12,7 @@ export function OrganizerCTASection() {
             {/* Subtle stage light — not decorative blob soup */}
             <div
               aria-hidden
-              className="pointer-events-none absolute -right-20 -top-24 size-[28rem] rounded-full opacity-40"
+              className="pointer-events-none absolute -right-20 -top-24 size-112 rounded-full opacity-40"
               style={{
                 background:
                   "radial-gradient(circle, oklch(0.72 0.18 265 / 0.55), transparent 65%)",

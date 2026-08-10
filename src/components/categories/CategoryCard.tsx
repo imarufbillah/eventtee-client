@@ -17,24 +17,24 @@ export function CategoryCard({ category, className }: CategoryCardProps) {
     <Link
       href={`/events?category=${category.slug}`}
       className={cn(
-        "group relative flex h-full min-h-[140px] flex-col justify-between overflow-hidden rounded-xl border border-border/70 p-5 transition-[transform,border-color,background-color] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]",
+        "group relative flex h-full min-h-35 flex-col justify-between overflow-hidden rounded-xl border border-border/70 p-5 transition-[transform,border-color,background-color] duration-300 ease-out-expo",
         "bg-card hover:border-primary/40 active:scale-[0.99]",
         accent.tint,
-        className
+        className,
       )}
     >
       <div className="flex items-start justify-between gap-3">
         <span
           className={cn(
-            "flex size-7 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary transition-transform duration-200 group-hover:scale-105"
+            "flex size-7 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary transition-transform duration-200 group-hover:scale-105",
           )}
         >
           <Sparkles className="size-3.5" aria-hidden />
         </span>
         <span
           className={cn(
-            "flex size-8 items-center justify-center rounded-full border border-border/60 bg-background/80 text-muted-foreground transition-[transform,background-color,color] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]",
-            "group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary"
+            "flex size-8 items-center justify-center rounded-full border border-border/60 bg-background/80 text-muted-foreground transition-[transform,background-color,color] duration-300 ease-out-expo",
+            "group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary",
           )}
         >
           <ArrowUpRight
@@ -48,7 +48,7 @@ export function CategoryCard({ category, className }: CategoryCardProps) {
         <h3
           className={cn(
             "font-display text-xl font-bold tracking-tight text-foreground transition-colors duration-200 sm:text-2xl",
-            "group-hover:text-primary"
+            "group-hover:text-primary",
           )}
         >
           {category.name}
