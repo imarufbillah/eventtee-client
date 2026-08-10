@@ -1,43 +1,59 @@
-import { Badge } from "@/components/ui/badge";
-import { Users } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface SeatBadgeProps {
   remainingSeats: number;
   capacity: number;
+  className?: string;
+  compact?: boolean;
 }
 
-export function SeatBadge({ remainingSeats }: SeatBadgeProps) {
+export function SeatBadge({
+  remainingSeats,
+  capacity,
+  className,
+  compact = false,
+}: SeatBadgeProps) {
   if (remainingSeats <= 0) {
     return (
-      <Badge
-        variant="destructive"
-        className="font-mono text-[11px] h-auto py-0.5"
+      <span
+        className={cn(
+          "inline-flex items-center gap-1.5 rounded-md border border-destructive/25 bg-destructive/10 px-2 py-0.5 font-mono text-[11px] font-semibold text-destructive",
+          className,
+        )}
       >
-        <Users className="size-3" data-icon="inline-start" />
-        Sold Out
-      </Badge>
+        <span className="size-1.5 rounded-full bg-destructive" aria-hidden />
+        Sold out
+      </span>
     );
   }
 
   if (remainingSeats <= 10) {
     return (
-      <Badge
-        variant="secondary"
-        className="font-mono text-[11px] h-auto py-0.5 border-amber-500/30 bg-amber-500/15 text-amber-600 dark:text-amber-400 animate-pulse"
+      <span
+        className={cn(
+          "inline-flex items-center gap-1.5 rounded-md border border-signal/40 bg-signal/15 px-2 py-0.5 font-mono text-[11px] font-semibold text-signal-foreground dark:text-signal",
+          className,
+        )}
       >
-        <Users className="size-3" data-icon="inline-start" />
-        Only {remainingSeats} left
-      </Badge>
+        <span className="size-1.5 animate-pulse rounded-full bg-signal" aria-hidden />
+        {compact ? `${remainingSeats} left` : `Only ${remainingSeats} seats left`}
+      </span>
     );
   }
 
+  const open = Math.round((remainingSeats / (capacity || 1)) * 100);
+
   return (
-    <Badge
-      variant="outline"
-      className="font-mono text-[11px] h-auto py-0.5 border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-md border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 font-mono text-[11px] font-medium text-emerald-700 dark:text-emerald-400",
+        className,
+      )}
     >
-      <Users className="size-3" data-icon="inline-start" />
-      {remainingSeats} seats available
-    </Badge>
+      <span className="size-1.5 rounded-full bg-emerald-500" aria-hidden />
+      {compact
+        ? `${remainingSeats} open`
+        : `${remainingSeats} seats · ${open}% open`}
+    </span>
   );
 }

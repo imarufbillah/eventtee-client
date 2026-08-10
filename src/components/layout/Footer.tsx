@@ -10,15 +10,16 @@ export function Footer() {
           <div className="md:col-span-2 space-y-4">
             <Link href="/" className="flex items-center gap-2.5">
               <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <Calendar className="size-4" />
+                <Calendar className="size-4" strokeWidth={1.75} />
               </div>
-              <span className="font-sans font-extrabold text-xl tracking-tight text-foreground">
+              <span className="font-display text-lg font-extrabold tracking-tight text-foreground">
                 Event<span className="text-primary">tee</span>
               </span>
             </Link>
-            <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
-              Full-stack live event ticketing and booking platform built with
-              Express, PostgreSQL, Prisma, and Next.js 16.
+            <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
+              Discover live events and reserve seats with real-time
+              availability. Built for attendees who hate double-bookings and
+              organizers who need a clean board.
             </p>
             <div className="flex items-center gap-3 pt-2 text-muted-foreground">
               <a
@@ -131,14 +132,13 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Tech Stack Spec */}
           <div className="space-y-3">
-            <h4 className="text-xs uppercase tracking-wider font-semibold text-foreground">
-              Technology
+            <h4 className="text-xs font-semibold tracking-wider text-foreground uppercase">
+              Why Eventtee
             </h4>
             <p className="text-xs leading-relaxed text-muted-foreground">
-              Powered by Next.js 16 App Router, Express 5, Better Auth,
-              PostgreSQL, & Prisma ORM.
+              Atomic seat locking, live remaining inventory, and verified
+              attendee reviews — so every ticket means a real seat.
             </p>
           </div>
         </div>

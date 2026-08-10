@@ -42,6 +42,77 @@ export function formatTime(dateString: string): string {
   }
 }
 
+/** Compact ticket-stub date: "SEP 15" */
+export function formatTicketDate(dateString: string): { month: string; day: string; weekday: string } {
+  try {
+    const date = new Date(dateString);
+    return {
+      month: new Intl.DateTimeFormat("en-US", { month: "short" })
+        .format(date)
+        .toUpperCase(),
+      day: new Intl.DateTimeFormat("en-US", { day: "numeric" }).format(date),
+      weekday: new Intl.DateTimeFormat("en-US", { weekday: "short" })
+        .format(date)
+        .toUpperCase(),
+    };
+  } catch {
+    return { month: "—", day: "—", weekday: "—" };
+  }
+}
+
+export function getBookedPercent(bookedSeats: number, capacity: number): number {
+  return Math.min(100, Math.round((bookedSeats / (capacity || 1)) * 100));
+}
+
+export function getCategoryAccent(slug: string): {
+  tint: string;
+  ink: string;
+  bar: string;
+} {
+  const s = slug.toLowerCase();
+  if (s.includes("tech") || s.includes("code") || s.includes("test")) {
+    return {
+      tint: "bg-primary/8 dark:bg-primary/15",
+      ink: "text-primary",
+      bar: "bg-primary",
+    };
+  }
+  if (s.includes("music") || s.includes("concert")) {
+    return {
+      tint: "bg-fuchsia-500/10 dark:bg-fuchsia-500/15",
+      ink: "text-fuchsia-600 dark:text-fuchsia-400",
+      bar: "bg-fuchsia-500",
+    };
+  }
+  if (s.includes("sport") || s.includes("fitness")) {
+    return {
+      tint: "bg-emerald-500/10 dark:bg-emerald-500/15",
+      ink: "text-emerald-600 dark:text-emerald-400",
+      bar: "bg-emerald-500",
+    };
+  }
+  if (s.includes("art") || s.includes("design")) {
+    return {
+      tint: "bg-amber-500/10 dark:bg-amber-500/15",
+      ink: "text-amber-700 dark:text-amber-400",
+      bar: "bg-amber-500",
+    };
+  }
+  if (s.includes("business") || s.includes("work")) {
+    return {
+      tint: "bg-cyan-500/10 dark:bg-cyan-500/15",
+      ink: "text-cyan-700 dark:text-cyan-400",
+      bar: "bg-cyan-500",
+    };
+  }
+  return {
+    tint: "bg-primary/8 dark:bg-primary/15",
+    ink: "text-primary",
+    bar: "bg-primary",
+  };
+}
+
+/** @deprecated Prefer getCategoryAccent — kept for any residual callers */
 export function getCategoryGradient(slug: string): string {
   const slugLower = slug.toLowerCase();
   if (slugLower.includes("tech") || slugLower.includes("code")) {

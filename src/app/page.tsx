@@ -13,11 +13,20 @@ export default async function Home() {
 
   const events = eventsData?.items || [];
   const categories = categoriesData?.items || [];
+  const featuredEvent = events[0] ?? null;
+  const totalEvents = eventsData?.total ?? events.length;
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <HeroSection categories={categories} />
-      <UpcomingEventsSection events={events} />
+    <div className="flex min-h-screen flex-col">
+      <HeroSection
+        categories={categories}
+        featuredEvent={featuredEvent}
+        totalEvents={totalEvents}
+      />
+      <UpcomingEventsSection
+        events={events}
+        skipFeaturedId={featuredEvent?.id}
+      />
       <CategoryShowcaseSection categories={categories} />
       <HowItWorksSection />
       <OrganizerCTASection />

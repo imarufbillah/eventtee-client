@@ -78,6 +78,16 @@ export interface Review {
   user?: User;
 }
 
+export interface EventListPayload {
+  events: Event[];
+  total: number;
+}
+
+export interface CategoryListPayload {
+  categories: Category[];
+  total: number;
+}
+
 export interface PaginatedResponse<T> {
   items: T[];
   total: number;

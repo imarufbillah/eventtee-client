@@ -5,30 +5,40 @@ import { cn } from "@/lib/utils";
 interface CategoryChipProps {
   category: Category;
   isActive?: boolean;
+  className?: string;
 }
 
-export function CategoryChip({ category, isActive }: CategoryChipProps) {
+export function CategoryChip({
+  category,
+  isActive,
+  className,
+}: CategoryChipProps) {
+  const count = category._count?.events;
+
   return (
     <Link
       href={`/events?category=${category.slug}`}
       className={cn(
-        "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-200 select-none active:scale-95",
+        "inline-flex items-center gap-2 whitespace-nowrap rounded-full border px-3.5 py-2 text-sm font-medium transition-[transform,background-color,border-color,color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] select-none",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+        "active:scale-[0.97]",
         isActive
-          ? "border-primary bg-primary text-primary-foreground shadow-xs"
-          : "border-border/60 bg-background/80 text-muted-foreground hover:border-primary/50 hover:bg-muted hover:text-foreground dark:bg-card/60",
+          ? "border-primary bg-primary text-primary-foreground"
+          : "border-border/80 bg-card/80 text-muted-foreground hover:border-primary/40 hover:bg-muted hover:text-foreground",
+        className,
       )}
     >
       <span>{category.name}</span>
-      {typeof category._count?.events === "number" && (
+      {typeof count === "number" && (
         <span
           className={cn(
-            "flex size-4 items-center justify-center rounded-full text-[10px] font-mono font-semibold",
+            "flex min-w-5 items-center justify-center rounded-full px-1.5 font-mono text-[11px] font-semibold tabular-nums",
             isActive
               ? "bg-primary-foreground/20 text-primary-foreground"
               : "bg-muted text-muted-foreground",
           )}
         >
-          {category._count.events}
+          {count}
         </span>
       )}
     </Link>
