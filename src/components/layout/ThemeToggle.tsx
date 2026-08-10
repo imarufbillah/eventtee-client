@@ -4,6 +4,11 @@ import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react";
 import { useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const emptySubscribe = () => () => {};
 
@@ -29,21 +34,34 @@ export function ThemeToggle() {
   }
 
   const isDark = theme === "dark";
+  const label = isDark ? "Switch to light mode" : "Switch to dark mode";
 
   return (
-    <Button
-      variant="ghost"
-      size="icon-sm"
-      className="size-8 rounded-full transition-transform active:scale-95"
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-      title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-    >
-      {isDark ? (
-        <Sun className="size-4 text-amber-400 transition-all duration-300 rotate-0 scale-100" />
-      ) : (
-        <Moon className="size-4 text-slate-700 transition-all duration-300 rotate-0 scale-100" />
-      )}
-      <span className="sr-only">Toggle theme</span>
-    </Button>
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="size-8 rounded-full transition-transform active:scale-95"
+            onClick={() => setTheme(isDark ? "light" : "dark")}
+          />
+        }
+      >
+        {isDark ? (
+          <Sun className="size-4 text-amber-400 transition-all duration-300 rotate-0 scale-100" />
+        ) : (
+          <Moon className="size-4 text-slate-700 transition-all duration-300 rotate-0 scale-100" />
+        )}
+        <span className="sr-only">Toggle theme</span>
+      </TooltipTrigger>
+      <TooltipContent
+        side="bottom"
+        align="end"
+        className="text-[11px] font-medium shadow-md"
+      >
+        <span>{label}</span>
+      </TooltipContent>
+    </Tooltip>
   );
 }
