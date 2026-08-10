@@ -314,16 +314,55 @@ export function Header() {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-b border-border/50 bg-background/95 backdrop-blur-xl px-4 py-4 space-y-3">
-          <nav className="flex flex-col space-y-2 text-sm font-medium">
+        <div className="md:hidden border-b border-border/50 bg-background/95 backdrop-blur-xl px-4 py-4 space-y-4 rounded-b-2xl shadow-xl max-h-[calc(100vh-4rem)] overflow-y-auto">
+          {/* User Profile Header Card (Mobile) */}
+          {user && (
+            <div className="rounded-xl border border-border/60 bg-muted/40 p-3 space-y-2.5">
+              <div className="flex items-center gap-3">
+                <Avatar size="lg" className="size-10 shrink-0">
+                  {user.image && (
+                    <AvatarImage src={user.image} alt={user.name || "User"} />
+                  )}
+                  <AvatarFallback className="text-sm font-bold bg-primary/15 text-primary">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col truncate">
+                  <span className="font-semibold text-sm text-foreground truncate">
+                    {user.name || "User"}
+                  </span>
+                  <span className="text-xs text-muted-foreground truncate">
+                    {user.email}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between border-t border-border/40 pt-2">
+                <Badge
+                  variant={getRoleBadgeVariant(userRole)}
+                  className="text-[10px] uppercase font-mono"
+                >
+                  {userRole || "USER"}
+                </Badge>
+                <span className="text-[10px] text-muted-foreground font-mono">
+                  Account Active
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Navigation Links */}
+          <nav className="flex flex-col space-y-1.5 text-sm font-medium">
+            <p className="px-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground font-mono">
+              Navigation
+            </p>
             <Link
               href="/"
               onClick={() => setMobileMenuOpen(false)}
               className={cn(
-                "px-3 py-2 rounded-lg transition-colors flex items-center justify-between",
+                "px-3 py-2.5 rounded-lg transition-colors flex items-center justify-between text-sm",
                 isActiveRoute("/")
-                  ? "bg-primary/10 text-primary font-semibold"
-                  : "hover:bg-muted",
+                  ? "bg-primary/10 text-primary font-semibold border border-primary/20"
+                  : "hover:bg-muted text-foreground",
               )}
             >
               <span>Home</span>
@@ -335,10 +374,10 @@ export function Header() {
               href="/events"
               onClick={() => setMobileMenuOpen(false)}
               className={cn(
-                "px-3 py-2 rounded-lg transition-colors flex items-center justify-between",
+                "px-3 py-2.5 rounded-lg transition-colors flex items-center justify-between text-sm",
                 isActiveRoute("/events")
-                  ? "bg-primary/10 text-primary font-semibold"
-                  : "hover:bg-muted",
+                  ? "bg-primary/10 text-primary font-semibold border border-primary/20"
+                  : "hover:bg-muted text-foreground",
               )}
             >
               <span>Browse Events</span>
@@ -346,68 +385,106 @@ export function Header() {
                 <span className="size-2 rounded-full bg-primary" />
               )}
             </Link>
-            {isOrganizer && (
-              <Link
-                href="/dashboard/events/new"
-                onClick={() => setMobileMenuOpen(false)}
-                className={cn(
-                  "px-3 py-2 rounded-lg transition-colors flex items-center justify-between",
-                  isActiveRoute("/dashboard/events/new")
-                    ? "bg-primary/15 text-primary font-semibold"
-                    : "bg-primary/10 text-primary hover:bg-primary/20",
-                )}
-              >
-                <span className="flex items-center gap-2">
-                  <PlusCircle className="size-4" />
-                  Create Event
-                </span>
-                {isActiveRoute("/dashboard/events/new") && (
-                  <span className="size-2 rounded-full bg-primary" />
-                )}
-              </Link>
-            )}
           </nav>
 
-          <div className="pt-3 border-t border-border/40">
+          {/* Account & Console Group */}
+          <div className="pt-2 border-t border-border/40 space-y-3">
             {user ? (
               <div className="space-y-2">
-                <div className="px-3 py-1.5 text-xs text-muted-foreground font-mono">
-                  Signed in as{" "}
-                  <span className="font-semibold text-foreground">
-                    {user.name || user.email}
-                  </span>
+                <p className="px-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground font-mono">
+                  Account Console
+                </p>
+                <div className="grid gap-1.5">
+                  <Button
+                    render={<Link href="/dashboard" />}
+                    nativeButton={false}
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start gap-2.5 h-10 px-3 text-xs"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <LayoutDashboard className="size-4 text-primary" />
+                    <span>Dashboard Overview</span>
+                  </Button>
+                  <Button
+                    render={<Link href="/dashboard/bookings" />}
+                    nativeButton={false}
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start gap-2.5 h-10 px-3 text-xs"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Ticket className="size-4 text-primary" />
+                    <span>My Bookings</span>
+                  </Button>
+                  <Button
+                    render={<Link href="/dashboard/profile" />}
+                    nativeButton={false}
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start gap-2.5 h-10 px-3 text-xs"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <UserIcon className="size-4 text-primary" />
+                    <span>My Profile &amp; Settings</span>
+                  </Button>
                 </div>
-                <Button
-                  render={<Link href="/dashboard/bookings" />}
-                  nativeButton={false}
-                  variant="outline"
-                  size="sm"
-                  className="w-full justify-start gap-2"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <Ticket className="size-4" />
-                  My Bookings
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  className="w-full justify-start gap-2"
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    signOut();
-                  }}
-                >
-                  <LogOut className="size-4" />
-                  Sign Out
-                </Button>
+
+                {isOrganizer && (
+                  <div className="pt-2 space-y-1.5">
+                    <p className="px-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground font-mono">
+                      Organizer Console
+                    </p>
+                    <div className="grid gap-1.5">
+                      <Button
+                        render={<Link href="/dashboard/events/new" />}
+                        nativeButton={false}
+                        variant="secondary"
+                        size="sm"
+                        className="w-full justify-start gap-2.5 h-10 px-3 text-xs font-semibold bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <PlusCircle className="size-4 text-primary" />
+                        <span>Create New Event</span>
+                      </Button>
+                      <Button
+                        render={<Link href="/dashboard/events" />}
+                        nativeButton={false}
+                        variant="outline"
+                        size="sm"
+                        className="w-full justify-start gap-2.5 h-10 px-3 text-xs"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <Calendar className="size-4 text-primary" />
+                        <span>Manage My Events</span>
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="pt-2">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="w-full justify-start gap-2.5 h-10 px-3 text-xs active:scale-[0.98]"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      signOut();
+                    }}
+                  >
+                    <LogOut className="size-4 text-destructive-foreground" />
+                    <span>Sign Out</span>
+                  </Button>
+                </div>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2 pt-1">
                 <Button
                   render={<Link href="/sign-in" />}
                   nativeButton={false}
                   variant="outline"
                   size="sm"
+                  className="h-10"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Sign In
@@ -416,6 +493,7 @@ export function Header() {
                   render={<Link href="/sign-up" />}
                   nativeButton={false}
                   size="sm"
+                  className="h-10 font-semibold"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Get Started
