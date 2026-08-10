@@ -47,7 +47,9 @@ export interface Event {
     id: string;
     name: string;
     email: string;
+    image?: string | null;
   };
+  reviews?: Review[];
   averageRating: number | null;
   totalReviews: number;
 }
