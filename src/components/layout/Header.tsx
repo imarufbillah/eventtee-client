@@ -7,6 +7,8 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Calendar,
+  Compass,
+  Home,
   LogOut,
   Menu,
   X,
@@ -59,6 +61,19 @@ export function Header() {
     return () => {
       document.body.style.overflow = "";
     };
+  }, [mobileMenuOpen]);
+
+  // Close mobile menu on Escape key press
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setMobileMenuOpen(false);
+      }
+    };
+    if (mobileMenuOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [mobileMenuOpen]);
 
   const user = session?.user;
@@ -363,13 +378,18 @@ export function Header() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -10, scale: 0.98 }}
                   transition={{ duration: 0.2, ease: "easeInOut" }}
-                  className="relative z-10 border-b border-border/50 bg-background/95 px-4 py-4 space-y-4 rounded-b-2xl shadow-2xl max-h-[calc(100vh-5rem)] overflow-y-auto"
+                  className="relative z-10 border-b border-border/50 bg-background/95 px-4 pt-2.5 pb-5 space-y-4 rounded-b-2xl shadow-2xl max-h-[calc(100vh-5rem)] overflow-y-auto"
                 >
+                  {/* Top Sheet Drag Handle Indicator */}
+                  <div className="flex justify-center pb-1">
+                    <span aria-hidden className="h-1 w-10 rounded-full bg-border/70" />
+                  </div>
+
                   {/* User Profile Header Card (Mobile) */}
                   {user && (
-                    <div className="rounded-xl border border-border/60 bg-muted/40 p-3 space-y-2.5">
+                    <div className="rounded-xl border border-border/70 bg-muted/40 p-3.5 space-y-2.5 shadow-2xs">
                       <div className="flex items-center gap-3">
-                        <Avatar size="lg" className="size-10 shrink-0">
+                        <Avatar size="lg" className="size-11 shrink-0 ring-2 ring-primary/20">
                           {user.image && (
                             <AvatarImage
                               src={user.image}
@@ -380,23 +400,24 @@ export function Header() {
                             {initials}
                           </AvatarFallback>
                         </Avatar>
-                        <div className="flex flex-col truncate">
+                        <div className="flex flex-col min-w-0">
                           <span className="font-semibold text-sm text-foreground truncate">
                             {user.name || "User"}
                           </span>
-                          <span className="text-xs text-muted-foreground truncate">
+                          <span className="text-xs text-muted-foreground truncate font-mono">
                             {user.email}
                           </span>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between border-t border-border/40 pt-2">
+                      <div className="flex items-center justify-between border-t border-border/50 pt-2.5">
                         <Badge
                           variant={getRoleBadgeVariant(userRole)}
-                          className="text-[10px] uppercase font-mono"
+                          className="text-[10px] uppercase font-mono px-2 py-0.5"
                         >
                           {userRole || "USER"}
                         </Badge>
-                        <span className="text-[10px] text-muted-foreground font-mono">
+                        <span className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-mono">
+                          <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
                           Account Active
                         </span>
                       </div>
@@ -404,21 +425,24 @@ export function Header() {
                   )}
 
                   {/* Navigation Links */}
-                  <nav className="flex flex-col space-y-1.5 text-sm font-medium">
-                    <p className="px-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground font-mono">
+                  <nav className="flex flex-col space-y-1 text-sm font-medium">
+                    <p className="px-1 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 font-mono">
                       Navigation
                     </p>
                     <Link
                       href="/"
                       onClick={() => setMobileMenuOpen(false)}
                       className={cn(
-                        "px-3 py-2.5 rounded-lg transition-colors flex items-center justify-between text-sm",
+                        "px-3.5 py-2.5 rounded-xl transition-all duration-200 flex items-center justify-between text-sm min-h-11 select-none active:scale-[0.99]",
                         isActiveRoute("/")
-                          ? "bg-primary/10 text-primary font-semibold border border-primary/20"
-                          : "hover:bg-muted text-foreground",
+                          ? "bg-primary/10 text-primary font-semibold border border-primary/25 shadow-2xs"
+                          : "hover:bg-muted text-foreground/90",
                       )}
                     >
-                      <span>Home</span>
+                      <span className="flex items-center gap-2.5">
+                        <Home className="size-4 text-primary" />
+                        <span>Home</span>
+                      </span>
                       {isActiveRoute("/") && (
                         <span className="size-2 rounded-full bg-primary" />
                       )}
@@ -427,13 +451,16 @@ export function Header() {
                       href="/events"
                       onClick={() => setMobileMenuOpen(false)}
                       className={cn(
-                        "px-3 py-2.5 rounded-lg transition-colors flex items-center justify-between text-sm",
+                        "px-3.5 py-2.5 rounded-xl transition-all duration-200 flex items-center justify-between text-sm min-h-11 select-none active:scale-[0.99]",
                         isActiveRoute("/events")
-                          ? "bg-primary/10 text-primary font-semibold border border-primary/20"
-                          : "hover:bg-muted text-foreground",
+                          ? "bg-primary/10 text-primary font-semibold border border-primary/25 shadow-2xs"
+                          : "hover:bg-muted text-foreground/90",
                       )}
                     >
-                      <span>Browse Events</span>
+                      <span className="flex items-center gap-2.5">
+                        <Compass className="size-4 text-primary" />
+                        <span>Browse Events</span>
+                      </span>
                       {isActiveRoute("/events") && (
                         <span className="size-2 rounded-full bg-primary" />
                       )}
@@ -441,51 +468,53 @@ export function Header() {
                   </nav>
 
                   {/* Account & Console Group */}
-                  <div className="pt-2 border-t border-border/40 space-y-3">
+                  <div className="pt-2 border-t border-border/50 space-y-3">
                     {user ? (
-                      <div className="space-y-2">
-                        <p className="px-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground font-mono">
-                          Account Console
-                        </p>
-                        <div className="grid gap-1.5">
-                          <Button
-                            render={<Link href="/dashboard" />}
-                            nativeButton={false}
-                            variant="outline"
-                            size="sm"
-                            className="w-full justify-start gap-2.5 h-10 px-3 text-xs"
-                            onClick={() => setMobileMenuOpen(false)}
-                          >
-                            <LayoutDashboard className="size-4 text-primary" />
-                            <span>Dashboard Overview</span>
-                          </Button>
-                          <Button
-                            render={<Link href="/dashboard/bookings" />}
-                            nativeButton={false}
-                            variant="outline"
-                            size="sm"
-                            className="w-full justify-start gap-2.5 h-10 px-3 text-xs"
-                            onClick={() => setMobileMenuOpen(false)}
-                          >
-                            <Ticket className="size-4 text-primary" />
-                            <span>My Bookings</span>
-                          </Button>
-                          <Button
-                            render={<Link href="/dashboard/profile" />}
-                            nativeButton={false}
-                            variant="outline"
-                            size="sm"
-                            className="w-full justify-start gap-2.5 h-10 px-3 text-xs"
-                            onClick={() => setMobileMenuOpen(false)}
-                          >
-                            <UserIcon className="size-4 text-primary" />
-                            <span>My Profile &amp; Settings</span>
-                          </Button>
+                      <div className="space-y-3">
+                        <div className="space-y-1">
+                          <p className="px-1 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 font-mono">
+                            Account Console
+                          </p>
+                          <div className="grid gap-1.5">
+                            <Button
+                              render={<Link href="/dashboard" />}
+                              nativeButton={false}
+                              variant="outline"
+                              size="sm"
+                              className="w-full justify-start gap-2.5 h-11 px-3.5 text-xs rounded-xl font-medium active:scale-[0.99]"
+                              onClick={() => setMobileMenuOpen(false)}
+                            >
+                              <LayoutDashboard className="size-4 text-primary" />
+                              <span>Dashboard Overview</span>
+                            </Button>
+                            <Button
+                              render={<Link href="/dashboard/bookings" />}
+                              nativeButton={false}
+                              variant="outline"
+                              size="sm"
+                              className="w-full justify-start gap-2.5 h-11 px-3.5 text-xs rounded-xl font-medium active:scale-[0.99]"
+                              onClick={() => setMobileMenuOpen(false)}
+                            >
+                              <Ticket className="size-4 text-primary" />
+                              <span>My Bookings</span>
+                            </Button>
+                            <Button
+                              render={<Link href="/dashboard/profile" />}
+                              nativeButton={false}
+                              variant="outline"
+                              size="sm"
+                              className="w-full justify-start gap-2.5 h-11 px-3.5 text-xs rounded-xl font-medium active:scale-[0.99]"
+                              onClick={() => setMobileMenuOpen(false)}
+                            >
+                              <UserIcon className="size-4 text-primary" />
+                              <span>My Profile &amp; Settings</span>
+                            </Button>
+                          </div>
                         </div>
 
                         {isOrganizer && (
-                          <div className="pt-2 space-y-1.5">
-                            <p className="px-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground font-mono">
+                          <div className="space-y-1 pt-1">
+                            <p className="px-1 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 font-mono">
                               Organizer Console
                             </p>
                             <div className="grid gap-1.5">
@@ -494,7 +523,7 @@ export function Header() {
                                 nativeButton={false}
                                 variant="secondary"
                                 size="sm"
-                                className="w-full justify-start gap-2.5 h-10 px-3 text-xs font-semibold bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20"
+                                className="w-full justify-start gap-2.5 h-11 px-3.5 text-xs font-semibold rounded-xl bg-primary/10 text-primary border border-primary/25 hover:bg-primary/20 active:scale-[0.99]"
                                 onClick={() => setMobileMenuOpen(false)}
                               >
                                 <PlusCircle className="size-4 text-primary" />
@@ -505,7 +534,7 @@ export function Header() {
                                 nativeButton={false}
                                 variant="outline"
                                 size="sm"
-                                className="w-full justify-start gap-2.5 h-10 px-3 text-xs"
+                                className="w-full justify-start gap-2.5 h-11 px-3.5 text-xs rounded-xl font-medium active:scale-[0.99]"
                                 onClick={() => setMobileMenuOpen(false)}
                               >
                                 <Calendar className="size-4 text-primary" />
@@ -515,11 +544,11 @@ export function Header() {
                           </div>
                         )}
 
-                        <div className="pt-2">
+                        <div className="pt-1">
                           <Button
                             variant="destructive"
                             size="sm"
-                            className="w-full justify-start gap-2.5 h-10 px-3 text-xs active:scale-[0.98]"
+                            className="w-full justify-start gap-2.5 h-11 px-3.5 text-xs rounded-xl font-medium active:scale-[0.98]"
                             onClick={() => {
                               setMobileMenuOpen(false);
                               signOut();
@@ -537,7 +566,7 @@ export function Header() {
                           nativeButton={false}
                           variant="outline"
                           size="sm"
-                          className="h-10"
+                          className="h-11 rounded-xl font-medium"
                           onClick={() => setMobileMenuOpen(false)}
                         >
                           Sign In
@@ -546,7 +575,7 @@ export function Header() {
                           render={<Link href="/sign-up" />}
                           nativeButton={false}
                           size="sm"
-                          className="h-10 font-semibold"
+                          className="h-11 rounded-xl font-semibold"
                           onClick={() => setMobileMenuOpen(false)}
                         >
                           Get Started
