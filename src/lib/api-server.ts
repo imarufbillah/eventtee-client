@@ -1,6 +1,6 @@
 import type { ApiResponse, Category, Event, PaginatedResponse } from "./types";
 
-const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL;
+const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
 
 export async function fetchActiveEvents(params?: {
   page?: number;
@@ -11,7 +11,7 @@ export async function fetchActiveEvents(params?: {
   const fallback: PaginatedResponse<Event> = {
     items: [],
     total: 0,
-    page: 1,
+    page: params?.page || 1,
     limit: params?.limit || 6,
     totalPages: 0,
   };
@@ -35,10 +35,22 @@ export async function fetchActiveEvents(params?: {
       return fallback;
     }
 
-    const json: ApiResponse<PaginatedResponse<Event>> = await res.json();
-    if (json?.data && Array.isArray(json.data.items)) {
-      return json.data;
+    const json: ApiResponse<{ events?: Event[]; items?: Event[]; total?: number }> = await res.json();
+    const rawEvents = json?.data?.events || json?.data?.items;
+
+    if (Array.isArray(rawEvents)) {
+      const total = json.data?.total ?? rawEvents.length;
+      const limit = params?.limit || 6;
+      const page = params?.page || 1;
+      return {
+        items: rawEvents,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit) || 1,
+      };
     }
+
     return fallback;
   } catch (error) {
     console.error("Error fetching active events:", error);
@@ -53,7 +65,7 @@ export async function fetchActiveCategories(params?: {
   const fallback: PaginatedResponse<Category> = {
     items: [],
     total: 0,
-    page: 1,
+    page: params?.page || 1,
     limit: params?.limit || 20,
     totalPages: 0,
   };
@@ -75,10 +87,22 @@ export async function fetchActiveCategories(params?: {
       return fallback;
     }
 
-    const json: ApiResponse<PaginatedResponse<Category>> = await res.json();
-    if (json?.data && Array.isArray(json.data.items)) {
-      return json.data;
+    const json: ApiResponse<{ categories?: Category[]; items?: Category[]; total?: number }> = await res.json();
+    const rawCategories = json?.data?.categories || json?.data?.items;
+
+    if (Array.isArray(rawCategories)) {
+      const total = json.data?.total ?? rawCategories.length;
+      const limit = params?.limit || 20;
+      const page = params?.page || 1;
+      return {
+        items: rawCategories,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit) || 1,
+      };
     }
+
     return fallback;
   } catch (error) {
     console.error("Error fetching active categories:", error);
