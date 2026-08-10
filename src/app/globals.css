@@ -147,6 +147,8 @@
   }
   html {
     @apply font-sans scroll-smooth;
+    scrollbar-color: oklch(from var(--muted-foreground) l c h / 0.4) transparent;
+    scrollbar-width: thin;
   }
   h1,
   h2,
@@ -156,6 +158,30 @@
   }
   p {
     text-wrap: pretty;
+  }
+
+  /* Theme-aware primary vertical scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: oklch(from var(--muted-foreground) l c h / 0.35);
+    border-radius: 9999px;
+    border: 2.5px solid var(--background);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: oklch(from var(--muted-foreground) l c h / 0.65);
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    background: var(--primary);
   }
 }
 
