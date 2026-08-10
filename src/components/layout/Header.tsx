@@ -313,43 +313,31 @@ export function Header() {
         </div>
       </div>
 
-      {/* Mobile Backdrop Overlay */}
+      {/* Mobile Menu & Blurred Backdrop Container */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            onClick={() => setMobileMenuOpen(false)}
-            className="fixed inset-0 top-16 z-40 bg-background/60 backdrop-blur-md md:hidden"
-            aria-hidden
-          />
-        )}
-      </AnimatePresence>
+          <>
+            {/* Full-Screen Blurred Backdrop Overlay */}
+            <motion.div
+              key="mobile-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+              onClick={() => setMobileMenuOpen(false)}
+              className="fixed inset-0 z-40 bg-background/60 backdrop-blur-md md:hidden"
+              aria-hidden
+            />
 
-      {/* Mobile Navigation Drawer */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            initial={{
-              opacity: 0,
-              y: -12,
-              scale: 0.98,
-            }}
-            animate={{
-              opacity: 1,
-              y: 0,
-              scale: 1,
-            }}
-            exit={{
-              opacity: 0,
-              y: -10,
-              scale: 0.98,
-            }}
-            transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
-            className="relative z-50 md:hidden border-b border-border/50 bg-background/95 px-4 py-4 space-y-4 rounded-b-2xl shadow-2xl max-h-[calc(100vh-5rem)] overflow-y-auto"
-          >
+            {/* Mobile Navigation Drawer */}
+            <motion.div
+              key="mobile-drawer"
+              initial={{ opacity: 0, y: -12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -12, scale: 0.98 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+              className="relative z-50 md:hidden border-b border-border/50 bg-background/95 px-4 py-4 space-y-4 rounded-b-2xl shadow-2xl max-h-[calc(100vh-5rem)] overflow-y-auto"
+            >
           {/* User Profile Header Card (Mobile) */}
           {user && (
             <div className="rounded-xl border border-border/60 bg-muted/40 p-3 space-y-2.5">
@@ -537,8 +525,9 @@ export function Header() {
             )}
           </div>
         </motion.div>
-      )}
-    </AnimatePresence>
+      </>
+    )}
+  </AnimatePresence>
     </header>
   );
 }
