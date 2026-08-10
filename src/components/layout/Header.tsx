@@ -313,7 +313,22 @@ export function Header() {
         </div>
       </div>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Backdrop Overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setMobileMenuOpen(false)}
+            className="fixed inset-0 top-16 z-40 bg-background/60 backdrop-blur-md md:hidden"
+            aria-hidden
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Mobile Navigation Drawer */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
@@ -321,22 +336,19 @@ export function Header() {
               opacity: 0,
               y: -12,
               scale: 0.98,
-              backdropFilter: "blur(0px)",
             }}
             animate={{
               opacity: 1,
               y: 0,
               scale: 1,
-              backdropFilter: "blur(24px)",
             }}
             exit={{
               opacity: 0,
               y: -10,
               scale: 0.98,
-              backdropFilter: "blur(0px)",
             }}
-            transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
-            className="md:hidden border-b border-border/50 bg-background/95 px-4 py-4 space-y-4 rounded-b-2xl shadow-xl max-h-[calc(100vh-4rem)] overflow-y-auto"
+            transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+            className="relative z-50 md:hidden border-b border-border/50 bg-background/95 px-4 py-4 space-y-4 rounded-b-2xl shadow-2xl max-h-[calc(100vh-5rem)] overflow-y-auto"
           >
           {/* User Profile Header Card (Mobile) */}
           {user && (
