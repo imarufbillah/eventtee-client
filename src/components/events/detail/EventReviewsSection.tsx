@@ -12,6 +12,9 @@ import {
   ChevronLeft,
   ChevronRight,
   ShieldCheck,
+  Pencil,
+  Trash2,
+  AlertTriangle,
 } from "lucide-react";
 import type { Event, Review, Booking } from "@/lib/types";
 import { useSession } from "@/lib/auth-client";
@@ -55,6 +58,17 @@ export function EventReviewsSection({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
+  // Edit Review State
+  const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
+  const [editRating, setEditRating] = useState<number>(5);
+  const [editHoverRating, setEditHoverRating] = useState<number>(0);
+  const [editComment, setEditComment] = useState<string>("");
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Delete Review State
+  const [deletingReviewId, setDeletingReviewId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const [hasConfirmedBooking, setHasConfirmedBooking] = useState<boolean | null>(null);
 
   const isCompleted = event.status === "COMPLETED";
@@ -62,6 +76,99 @@ export function EventReviewsSection({
   const userHasReviewed = currentUserId
     ? reviewsList.some((r) => r.userId === currentUserId || r.user?.id === currentUserId)
     : false;
+
+  const startEdit = (review: Review) => {
+    setEditingReviewId(review.id);
+    setEditRating(review.rating);
+    setEditComment(review.comment || "");
+  };
+
+  const handleEditSubmit = async (reviewId: string) => {
+    setIsUpdating(true);
+    try {
+      const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
+      const res = await fetch(`${SERVER_URL}/api/v1/reviews/${reviewId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          rating: editRating,
+          comment: editComment.trim() || undefined,
+        }),
+      });
+
+      const json = await res.json();
+
+      if (!res.ok || !json.success) {
+        toast.add({
+          title: "Update Failed",
+          description: json.message || "Failed to update review.",
+        });
+        return;
+      }
+
+      toast.add({
+        title: "Review Updated!",
+        description: "Your review feedback was updated successfully.",
+      });
+
+      setReviewsList((prev) =>
+        prev.map((r) =>
+          r.id === reviewId
+            ? { ...r, rating: editRating, comment: editComment.trim() || null }
+            : r
+        )
+      );
+      setEditingReviewId(null);
+      router.refresh();
+    } catch (err) {
+      console.error("Error updating review:", err);
+      toast.add({
+        title: "Network Error",
+        description: "Failed to connect to the server. Please try again.",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleDeleteConfirm = async (reviewId: string) => {
+    setIsDeleting(true);
+    try {
+      const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
+      const res = await fetch(`${SERVER_URL}/api/v1/reviews/${reviewId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      const json = await res.json();
+
+      if (!res.ok || !json.success) {
+        toast.add({
+          title: "Delete Failed",
+          description: json.message || "Failed to delete review.",
+        });
+        return;
+      }
+
+      toast.add({
+        title: "Review Deleted",
+        description: "Your review has been permanently removed.",
+      });
+
+      setReviewsList((prev) => prev.filter((r) => r.id !== reviewId));
+      setDeletingReviewId(null);
+      router.refresh();
+    } catch (err) {
+      console.error("Error deleting review:", err);
+      toast.add({
+        title: "Network Error",
+        description: "Failed to connect to server. Please try again.",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -429,6 +536,9 @@ export function EventReviewsSection({
               .slice(0, 2);
 
             const dateFormatted = formatDate(rev.createdAt);
+            const isAuthor = currentUserId
+              ? rev.userId === currentUserId || rev.user?.id === currentUserId
+              : false;
 
             return (
               <div
@@ -446,38 +556,183 @@ export function EventReviewsSection({
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <h4 className="font-semibold text-foreground text-sm">
-                        {reviewerName}
-                      </h4>
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-semibold text-foreground text-sm">
+                          {reviewerName}
+                        </h4>
+                        {isAuthor && (
+                          <span className="font-mono text-[10px] text-primary bg-primary/10 border border-primary/20 rounded-full px-2 py-0.5 font-bold">
+                            You
+                          </span>
+                        )}
+                      </div>
                       <p className="font-mono text-[11px] text-muted-foreground">
                         {dateFormatted}
                       </p>
                     </div>
                   </div>
 
-                  {/* Rating Stars */}
-                  <div className="flex items-center gap-0.5">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`size-3.5 ${
-                          i < rev.rating
-                            ? "fill-amber-400 text-amber-400"
-                            : "text-muted-foreground/30"
-                        }`}
-                      />
-                    ))}
+                  {/* Actions & Rating */}
+                  <div className="flex items-center gap-3">
+                    {/* Rating Stars */}
+                    <div className="flex items-center gap-0.5">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`size-3.5 ${
+                            i < rev.rating
+                              ? "fill-amber-400 text-amber-400"
+                              : "text-muted-foreground/30"
+                          }`}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Author Edit & Delete Buttons */}
+                    {isAuthor && editingReviewId !== rev.id && (
+                      <div className="flex items-center gap-1 border-l border-border/60 pl-2">
+                        <button
+                          type="button"
+                          onClick={() => startEdit(rev)}
+                          className="p-1 text-muted-foreground hover:text-primary transition-colors rounded-lg hover:bg-muted"
+                          title="Edit Review"
+                        >
+                          <Pencil className="size-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDeletingReviewId(rev.id)}
+                          className="p-1 text-muted-foreground hover:text-destructive transition-colors rounded-lg hover:bg-muted"
+                          title="Delete Review"
+                        >
+                          <Trash2 className="size-3.5" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                {rev.comment && (
-                  <p className="text-sm text-foreground/90 leading-relaxed pl-12">
-                    &ldquo;{rev.comment}&rdquo;
-                  </p>
+                {/* Inline Edit Form */}
+                {editingReviewId === rev.id ? (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleEditSubmit(rev.id);
+                    }}
+                    className="mt-3 space-y-3 rounded-xl border border-primary/30 bg-card p-4"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs font-bold text-foreground">Edit Review</span>
+                      <button
+                        type="button"
+                        onClick={() => setEditingReviewId(null)}
+                        className="text-xs font-mono text-muted-foreground hover:text-foreground"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+
+                    {/* Star Rating Picker */}
+                    <div className="flex items-center gap-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setEditRating(star)}
+                          onMouseEnter={() => setEditHoverRating(star)}
+                          onMouseLeave={() => setEditHoverRating(0)}
+                          className="p-0.5"
+                        >
+                          <Star
+                            className={`size-5 ${
+                              star <= (editHoverRating || editRating)
+                                ? "fill-amber-400 text-amber-400"
+                                : "text-muted-foreground/30"
+                            }`}
+                          />
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Textarea */}
+                    <textarea
+                      rows={2}
+                      value={editComment}
+                      onChange={(e) => setEditComment(e.target.value)}
+                      className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                    />
+
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditingReviewId(null)}
+                        className="rounded-full text-xs"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        size="sm"
+                        disabled={isUpdating}
+                        className="rounded-full text-xs font-bold"
+                      >
+                        {isUpdating ? <Loader2 className="size-3 animate-spin" /> : "Save Changes"}
+                      </Button>
+                    </div>
+                  </form>
+                ) : (
+                  rev.comment && (
+                    <p className="text-sm text-foreground/90 leading-relaxed pl-12">
+                      &ldquo;{rev.comment}&rdquo;
+                    </p>
+                  )
                 )}
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deletingReviewId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-sm rounded-[2rem] border border-border/80 bg-card p-2 shadow-2xl">
+            <div className="rounded-[calc(2rem-0.5rem)] border border-border/60 bg-background p-5 space-y-4 text-center">
+              <div className="mx-auto flex size-10 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+                <AlertTriangle className="size-5" />
+              </div>
+              <div>
+                <h3 className="font-display text-base font-bold text-foreground">
+                  Delete Your Review?
+                </h3>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  This review will be permanently deleted.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 pt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setDeletingReviewId(null)}
+                  disabled={isDeleting}
+                  className="flex-1 rounded-full text-xs"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => handleDeleteConfirm(deletingReviewId)}
+                  disabled={isDeleting}
+                  className="flex-1 rounded-full text-xs font-bold"
+                >
+                  {isDeleting ? <Loader2 className="size-3 animate-spin" /> : "Delete Review"}
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
