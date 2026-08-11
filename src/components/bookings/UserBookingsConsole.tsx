@@ -3,13 +3,15 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Ticket, Search, Calendar, MapPin, Loader2, CheckCircle2, Clock, XCircle, ArrowLeft, Filter, Sparkles } from "lucide-react";
+import { Ticket, Search, Calendar, MapPin, CheckCircle2, Clock, XCircle, ArrowLeft, Filter, Sparkles } from "lucide-react";
 import type { Booking } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
 import { formatDate } from "@/lib/utils";
+
+import { BookingCancelDialog } from "./BookingCancelDialog";
 
 interface UserBookingsConsoleProps {
   initialBookings: Booking[];
@@ -19,7 +21,7 @@ export function UserBookingsConsole({ initialBookings }: UserBookingsConsoleProp
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"ALL" | "CONFIRMED" | "PENDING" | "CANCELLED">("ALL");
   const [searchQuery, setSearchQuery] = useState("");
-  const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [bookingToCancel, setBookingToCancel] = useState<Booking | null>(null);
 
   const filteredBookings = useMemo(() => {
     return initialBookings.filter((booking) => {
@@ -42,8 +44,7 @@ export function UserBookingsConsole({ initialBookings }: UserBookingsConsoleProp
     });
   }, [initialBookings, activeTab, searchQuery]);
 
-  const handleCancel = async (bookingId: string) => {
-    setCancellingId(bookingId);
+  const handleConfirmCancel = async (bookingId: string) => {
     try {
       const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
       const res = await fetch(`${SERVER_URL}/api/v1/bookings/cancel/${bookingId}`, {
@@ -72,8 +73,6 @@ export function UserBookingsConsole({ initialBookings }: UserBookingsConsoleProp
         title: "Network Error",
         description: "Failed to connect to server. Please try again.",
       });
-    } finally {
-      setCancellingId(null);
     }
   };
 
@@ -218,7 +217,6 @@ export function UserBookingsConsole({ initialBookings }: UserBookingsConsoleProp
         <div className="space-y-4">
           {filteredBookings.map((booking) => {
             const event = booking.event;
-            const isCancelling = cancellingId === booking.id;
             const canCancel = booking.status !== "CANCELLED";
 
             return (
@@ -297,15 +295,10 @@ export function UserBookingsConsole({ initialBookings }: UserBookingsConsoleProp
                         <Button
                           variant="destructive"
                           size="sm"
-                          disabled={isCancelling}
-                          onClick={() => handleCancel(booking.id)}
+                          onClick={() => setBookingToCancel(booking)}
                           className="rounded-full text-xs font-semibold"
                         >
-                          {isCancelling ? (
-                            <Loader2 className="size-3.5 animate-spin" />
-                          ) : (
-                            "Cancel Booking"
-                          )}
+                          Cancel Booking
                         </Button>
                       )}
                     </div>
@@ -317,6 +310,14 @@ export function UserBookingsConsole({ initialBookings }: UserBookingsConsoleProp
           })}
         </div>
       )}
+
+      {/* Cancellation Confirmation Dialog */}
+      <BookingCancelDialog
+        booking={bookingToCancel}
+        isOpen={!!bookingToCancel}
+        onClose={() => setBookingToCancel(null)}
+        onConfirmCancel={handleConfirmCancel}
+      />
 
     </div>
   );

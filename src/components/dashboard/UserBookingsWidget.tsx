@@ -3,12 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Ticket, Calendar, MapPin, Loader2, CheckCircle2, Clock, XCircle, ArrowRight } from "lucide-react";
+import { Ticket, Calendar, MapPin, CheckCircle2, Clock, XCircle, ArrowRight } from "lucide-react";
 import type { Booking } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import { formatDate } from "@/lib/utils";
+
+import { BookingCancelDialog } from "@/components/bookings/BookingCancelDialog";
 
 interface UserBookingsWidgetProps {
   bookings: Booking[];
@@ -16,10 +18,9 @@ interface UserBookingsWidgetProps {
 
 export function UserBookingsWidget({ bookings }: UserBookingsWidgetProps) {
   const router = useRouter();
-  const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [bookingToCancel, setBookingToCancel] = useState<Booking | null>(null);
 
-  const handleCancelBooking = async (bookingId: string) => {
-    setCancellingId(bookingId);
+  const handleConfirmCancel = async (bookingId: string) => {
     try {
       const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
       const res = await fetch(`${SERVER_URL}/api/v1/bookings/cancel/${bookingId}`, {
@@ -48,8 +49,6 @@ export function UserBookingsWidget({ bookings }: UserBookingsWidgetProps) {
         title: "Network Error",
         description: "Failed to connect to the server. Please try again.",
       });
-    } finally {
-      setCancellingId(null);
     }
   };
 
@@ -131,7 +130,6 @@ export function UserBookingsWidget({ bookings }: UserBookingsWidgetProps) {
           <div className="space-y-4">
             {bookings.map((booking) => {
               const event = booking.event;
-              const isCancelling = cancellingId === booking.id;
               const canCancel = booking.status !== "CANCELLED";
 
               return (
@@ -191,15 +189,10 @@ export function UserBookingsWidget({ bookings }: UserBookingsWidgetProps) {
                       <Button
                         variant="outline"
                         size="sm"
-                        disabled={isCancelling}
-                        onClick={() => handleCancelBooking(booking.id)}
+                        onClick={() => setBookingToCancel(booking)}
                         className="rounded-full text-xs font-semibold text-destructive hover:bg-destructive/10"
                       >
-                        {isCancelling ? (
-                          <Loader2 className="size-3.5 animate-spin" />
-                        ) : (
-                          "Cancel"
-                        )}
+                        Cancel
                       </Button>
                     )}
                   </div>
@@ -210,6 +203,14 @@ export function UserBookingsWidget({ bookings }: UserBookingsWidgetProps) {
         )}
 
       </div>
+
+      {/* Cancellation Confirmation Dialog */}
+      <BookingCancelDialog
+        booking={bookingToCancel}
+        isOpen={!!bookingToCancel}
+        onClose={() => setBookingToCancel(null)}
+        onConfirmCancel={handleConfirmCancel}
+      />
     </div>
   );
 }
