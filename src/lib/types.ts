@@ -10,6 +10,7 @@ export interface User {
   email: string;
   role: Role;
   image?: string | null;
+  isDeleted?: boolean;
   createdAt: string;
   updatedAt: string;
 }
