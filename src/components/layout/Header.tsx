@@ -16,6 +16,10 @@ import {
   LayoutDashboard,
   Ticket,
   User as UserIcon,
+  Users,
+  FolderTree,
+  ShieldAlert,
+  MessageSquare,
 } from "lucide-react";
 import { useSession, signOut } from "@/lib/auth-client";
 import { toast } from "@/components/ui/toast";
@@ -91,6 +95,7 @@ export function Header() {
     | string
     | undefined;
   const isOrganizer = userRole === "ORGANIZER" || userRole === "ADMIN";
+  const isAdmin = userRole === "ADMIN";
 
   const initials = user?.name
     ? user.name
@@ -304,6 +309,34 @@ export function Header() {
                       >
                         <Calendar className="size-4 text-primary" />
                         <span>Manage My Events</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                  </>
+                )}
+
+                {/* Role-Gated Admin Group */}
+                {isAdmin && (
+                  <>
+                    <DropdownMenuSeparator className="my-1" />
+                    <DropdownMenuGroup>
+                      <DropdownMenuLabel className="px-2 py-1 text-[10px] uppercase tracking-wider font-semibold text-destructive">
+                        Admin System Console
+                      </DropdownMenuLabel>
+                      <DropdownMenuItem render={<Link href="/admin/users" />}>
+                        <Users className="size-4 text-destructive" />
+                        <span>User Accounts</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem render={<Link href="/admin/categories" />}>
+                        <FolderTree className="size-4 text-destructive" />
+                        <span>Categories CRUD</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem render={<Link href="/admin/events" />}>
+                        <ShieldAlert className="size-4 text-destructive" />
+                        <span>All Event Overrides</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem render={<Link href="/admin/reviews" />}>
+                        <MessageSquare className="size-4 text-destructive" />
+                        <span>Review Moderation</span>
                       </DropdownMenuItem>
                     </DropdownMenuGroup>
                   </>
@@ -553,6 +586,60 @@ export function Header() {
                               >
                                 <Calendar className="size-4 text-primary" />
                                 <span>Manage My Events</span>
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+
+                        {isAdmin && (
+                          <div className="space-y-1 pt-1">
+                            <p className="px-1 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-destructive font-mono">
+                              Admin System Console
+                            </p>
+                            <div className="grid gap-1.5">
+                              <Button
+                                render={<Link href="/admin/users" />}
+                                nativeButton={false}
+                                variant="outline"
+                                size="sm"
+                                className="w-full justify-start gap-2.5 h-10 px-3.5 text-xs rounded-xl font-medium border-destructive/30 hover:bg-destructive/10 text-foreground active:scale-[0.99]"
+                                onClick={() => setMobileMenuOpen(false)}
+                              >
+                                <Users className="size-4 text-destructive" />
+                                <span>User Accounts</span>
+                              </Button>
+                              <Button
+                                render={<Link href="/admin/categories" />}
+                                nativeButton={false}
+                                variant="outline"
+                                size="sm"
+                                className="w-full justify-start gap-2.5 h-10 px-3.5 text-xs rounded-xl font-medium border-destructive/30 hover:bg-destructive/10 text-foreground active:scale-[0.99]"
+                                onClick={() => setMobileMenuOpen(false)}
+                              >
+                                <FolderTree className="size-4 text-destructive" />
+                                <span>Categories CRUD</span>
+                              </Button>
+                              <Button
+                                render={<Link href="/admin/events" />}
+                                nativeButton={false}
+                                variant="outline"
+                                size="sm"
+                                className="w-full justify-start gap-2.5 h-10 px-3.5 text-xs rounded-xl font-medium border-destructive/30 hover:bg-destructive/10 text-foreground active:scale-[0.99]"
+                                onClick={() => setMobileMenuOpen(false)}
+                              >
+                                <ShieldAlert className="size-4 text-destructive" />
+                                <span>All Event Overrides</span>
+                              </Button>
+                              <Button
+                                render={<Link href="/admin/reviews" />}
+                                nativeButton={false}
+                                variant="outline"
+                                size="sm"
+                                className="w-full justify-start gap-2.5 h-10 px-3.5 text-xs rounded-xl font-medium border-destructive/30 hover:bg-destructive/10 text-foreground active:scale-[0.99]"
+                                onClick={() => setMobileMenuOpen(false)}
+                              >
+                                <MessageSquare className="size-4 text-destructive" />
+                                <span>Review Moderation</span>
                               </Button>
                             </div>
                           </div>
