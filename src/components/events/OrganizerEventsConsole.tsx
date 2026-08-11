@@ -2,11 +2,13 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Calendar, Plus, Search, CheckCircle2, Sparkles, Filter, ArrowLeft, Users, Edit, Eye, Ticket, Ban } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Calendar, Plus, Search, CheckCircle2, Sparkles, Filter, ArrowLeft, Users, Edit, Eye, Ticket, Ban, Trash2, RefreshCw, Loader2 } from "lucide-react";
 import type { Event } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/toast";
 import { formatDate } from "@/lib/utils";
 import { EventStatusDialog, type EventStatusAction } from "./EventStatusDialog";
 
@@ -15,12 +17,86 @@ interface OrganizerEventsConsoleProps {
 }
 
 export function OrganizerEventsConsole({ initialEvents }: OrganizerEventsConsoleProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"ALL" | "DRAFT" | "PUBLISHED" | "CANCELLED" | "COMPLETED">("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusDialogState, setStatusDialogState] = useState<{
     event: Event;
     action: EventStatusAction;
   } | null>(null);
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+
+  const handleSoftDelete = async (eventId: string) => {
+    setActionLoadingId(eventId);
+    try {
+      const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
+      const res = await fetch(`${SERVER_URL}/api/v1/events/soft-delete/${eventId}`, {
+        method: "PATCH",
+        credentials: "include",
+      });
+
+      const json = await res.json();
+
+      if (!res.ok || !json.success) {
+        toast.add({
+          title: "Delete Failed",
+          description: json.message || "Failed to soft-delete event.",
+        });
+        return;
+      }
+
+      toast.add({
+        title: "Event Soft-Deleted",
+        description: "Event has been hidden from public catalog views.",
+      });
+
+      router.refresh();
+    } catch (err) {
+      console.error("Soft delete error:", err);
+      toast.add({
+        title: "Network Error",
+        description: "Failed to connect to the server. Please try again.",
+      });
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleRestore = async (eventId: string) => {
+    setActionLoadingId(eventId);
+    try {
+      const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
+      const res = await fetch(`${SERVER_URL}/api/v1/events/restore/${eventId}`, {
+        method: "PATCH",
+        credentials: "include",
+      });
+
+      const json = await res.json();
+
+      if (!res.ok || !json.success) {
+        toast.add({
+          title: "Restore Failed",
+          description: json.message || "Failed to restore event.",
+        });
+        return;
+      }
+
+      toast.add({
+        title: "Event Restored!",
+        description: "Event is now restored back to active listing status.",
+      });
+
+      router.refresh();
+    } catch (err) {
+      console.error("Restore error:", err);
+      toast.add({
+        title: "Network Error",
+        description: "Failed to connect to the server. Please try again.",
+      });
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
 
   const filteredEvents = useMemo(() => {
     return initialEvents.filter((ev) => {
@@ -214,6 +290,12 @@ export function OrganizerEventsConsole({ initialEvents }: OrganizerEventsConsole
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                     <div className="space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
+                        {ev.isDeleted && (
+                          <Badge variant="destructive" className="font-mono text-[10px] gap-1">
+                            <Trash2 className="size-3" />
+                            <span>DELETED</span>
+                          </Badge>
+                        )}
                         {getStatusBadge(ev.status)}
                         {ev.category && (
                           <Badge variant="outline" className="font-mono text-[10px]">
@@ -240,7 +322,7 @@ export function OrganizerEventsConsole({ initialEvents }: OrganizerEventsConsole
 
                     {/* Action Shortcut Buttons */}
                     <div className="flex flex-wrap items-center gap-2">
-                      {isDraft && (
+                      {!ev.isDeleted && isDraft && (
                         <Button
                           size="sm"
                           onClick={() => setStatusDialogState({ event: ev, action: "PUBLISH" })}
@@ -251,15 +333,51 @@ export function OrganizerEventsConsole({ initialEvents }: OrganizerEventsConsole
                         </Button>
                       )}
 
-                      {(isDraft || ev.status === "PUBLISHED") && (
+                      {!ev.isDeleted && (isDraft || ev.status === "PUBLISHED") && (
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => setStatusDialogState({ event: ev, action: "CANCEL" })}
-                          className="rounded-full text-xs font-semibold gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30"
+                          className="rounded-full text-xs font-semibold gap-1.5 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 border-amber-500/30"
                         >
                           <Ban className="size-3.5" />
                           <span>Cancel Event</span>
+                        </Button>
+                      )}
+
+                      {!ev.isDeleted ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={actionLoadingId === ev.id}
+                          onClick={() => handleSoftDelete(ev.id)}
+                          className="rounded-full text-xs font-semibold gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30"
+                        >
+                          {actionLoadingId === ev.id ? (
+                            <Loader2 className="size-3.5 animate-spin" />
+                          ) : (
+                            <>
+                              <Trash2 className="size-3.5" />
+                              <span>Delete</span>
+                            </>
+                          )}
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="default"
+                          size="sm"
+                          disabled={actionLoadingId === ev.id}
+                          onClick={() => handleRestore(ev.id)}
+                          className="rounded-full text-xs font-bold gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white"
+                        >
+                          {actionLoadingId === ev.id ? (
+                            <Loader2 className="size-3.5 animate-spin" />
+                          ) : (
+                            <>
+                              <RefreshCw className="size-3.5" />
+                              <span>Restore</span>
+                            </>
+                          )}
                         </Button>
                       )}
 
