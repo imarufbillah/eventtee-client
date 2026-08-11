@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import type { Event, User } from "@/lib/types";
 import { OrganizerEventsConsole } from "@/components/events/OrganizerEventsConsole";
 
@@ -33,12 +32,12 @@ export default async function HostedEventsPage() {
   }
 
   if (!user) {
-    redirect("/sign-in?redirect=%2Fdashboard%2Fevents");
+    return null;
   }
 
   const isOrganizer = user.role === "ORGANIZER" || user.role === "ADMIN";
   if (!isOrganizer) {
-    redirect("/dashboard/bookings");
+    return null;
   }
 
   // 2. Fetch Organizer's Hosted Events

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import type { Booking, User } from "@/lib/types";
 import { UserBookingsConsole } from "@/components/bookings/UserBookingsConsole";
 
@@ -33,7 +32,7 @@ export default async function BookingsPage() {
   }
 
   if (!user) {
-    redirect("/sign-in?redirect=%2Fdashboard%2Fbookings");
+    return null;
   }
 
   // 2. Fetch User Bookings

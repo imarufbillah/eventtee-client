@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import type { User } from "@/lib/types";
 import { AdminUsersConsole } from "@/components/admin/AdminUsersConsole";
 
@@ -33,11 +32,11 @@ export default async function AdminUsersPage() {
   }
 
   if (!currentUser) {
-    redirect("/sign-in?redirect=%2Fadmin%2Fusers");
+    return null;
   }
 
   if (currentUser.role !== "ADMIN") {
-    redirect("/dashboard");
+    return null;
   }
 
   // 2. Fetch All System Users

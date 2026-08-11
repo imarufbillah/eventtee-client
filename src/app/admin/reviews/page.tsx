@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import type { Review, User } from "@/lib/types";
 import { AdminReviewsConsole } from "@/components/admin/AdminReviewsConsole";
 
@@ -33,11 +32,11 @@ export default async function AdminReviewsPage() {
   }
 
   if (!currentUser) {
-    redirect("/sign-in?redirect=%2Fadmin%2Freviews");
+    return null;
   }
 
   if (currentUser.role !== "ADMIN") {
-    redirect("/dashboard");
+    return null;
   }
 
   // 2. Fetch All System Reviews (including deleted ones)

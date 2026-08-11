@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import type { Event, User } from "@/lib/types";
 import { AdminEventsConsole } from "@/components/admin/AdminEventsConsole";
 
@@ -33,11 +32,11 @@ export default async function AdminEventsPage() {
   }
 
   if (!currentUser) {
-    redirect("/sign-in?redirect=%2Fadmin%2Fevents");
+    return null;
   }
 
   if (currentUser.role !== "ADMIN") {
-    redirect("/dashboard");
+    return null;
   }
 
   // 2. Fetch All System Events (including deleted ones)

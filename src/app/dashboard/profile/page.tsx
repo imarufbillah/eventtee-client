@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import type { User } from "@/lib/types";
 import { UserProfileConsole } from "@/components/profile/UserProfileConsole";
 
@@ -33,7 +32,7 @@ export default async function ProfilePage() {
   }
 
   if (!user) {
-    redirect("/sign-in?redirect=%2Fdashboard%2Fprofile");
+    return null;
   }
 
   return (

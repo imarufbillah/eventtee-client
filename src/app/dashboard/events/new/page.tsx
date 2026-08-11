@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import type { Category, User } from "@/lib/types";
 import { EventForm } from "@/components/events/EventForm";
 
@@ -33,12 +32,12 @@ export default async function CreateEventPage() {
   }
 
   if (!user) {
-    redirect("/sign-in?redirect=%2Fdashboard%2Fevents%2Fnew");
+    return null;
   }
 
   const isOrganizer = user.role === "ORGANIZER" || user.role === "ADMIN";
   if (!isOrganizer) {
-    redirect("/dashboard/bookings");
+    return null;
   }
 
   // 2. Fetch Active Categories

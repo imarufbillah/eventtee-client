@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import type { Category, User } from "@/lib/types";
 import { AdminCategoriesConsole } from "@/components/admin/AdminCategoriesConsole";
 
@@ -33,11 +32,11 @@ export default async function AdminCategoriesPage() {
   }
 
   if (!currentUser) {
-    redirect("/sign-in?redirect=%2Fadmin%2Fcategories");
+    return null;
   }
 
   if (currentUser.role !== "ADMIN") {
-    redirect("/dashboard");
+    return null;
   }
 
   // 2. Fetch All Categories (including deleted ones)

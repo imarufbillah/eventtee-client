@@ -38,12 +38,12 @@ export default async function EventBookingsPage({ params }: EventBookingsPagePro
   }
 
   if (!user) {
-    redirect(`/sign-in?redirect=%2Fdashboard%2Fevents%2F${id}%2Fbookings`);
+    return null;
   }
 
   const isOrganizer = user.role === "ORGANIZER" || user.role === "ADMIN";
   if (!isOrganizer) {
-    redirect("/dashboard/bookings");
+    return null;
   }
 
   // 2. Fetch Event Details and Bookings in Parallel
@@ -85,7 +85,7 @@ export default async function EventBookingsPage({ params }: EventBookingsPagePro
   // 3. Ownership Guard: Must be organizer of this event or ADMIN
   const isOwner = event.organizerId === user.id || user.role === "ADMIN";
   if (!isOwner) {
-    redirect("/dashboard/events");
+    return null;
   }
 
   return (

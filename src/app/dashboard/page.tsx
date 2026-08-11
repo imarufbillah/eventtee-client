@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import type { Booking, Event, User } from "@/lib/types";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DashboardMetrics } from "@/components/dashboard/DashboardMetrics";
@@ -40,7 +39,7 @@ export default async function DashboardPage() {
   }
 
   if (!user) {
-    redirect("/sign-in?redirect=%2Fdashboard");
+    return null;
   }
 
   const isOrganizer = user.role === "ORGANIZER" || user.role === "ADMIN";
