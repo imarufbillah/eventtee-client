@@ -2,24 +2,25 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Calendar, Plus, Search, Loader2, CheckCircle2, Sparkles, Filter, ArrowLeft, Users, Edit, Eye, Ticket } from "lucide-react";
+import { Calendar, Plus, Search, CheckCircle2, Sparkles, Filter, ArrowLeft, Users, Edit, Eye, Ticket, Ban } from "lucide-react";
 import type { Event } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { toast } from "@/components/ui/toast";
 import { formatDate } from "@/lib/utils";
+import { EventStatusDialog, type EventStatusAction } from "./EventStatusDialog";
 
 interface OrganizerEventsConsoleProps {
   initialEvents: Event[];
 }
 
 export function OrganizerEventsConsole({ initialEvents }: OrganizerEventsConsoleProps) {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"ALL" | "DRAFT" | "PUBLISHED" | "CANCELLED" | "COMPLETED">("ALL");
   const [searchQuery, setSearchQuery] = useState("");
-  const [publishingId, setPublishingId] = useState<string | null>(null);
+  const [statusDialogState, setStatusDialogState] = useState<{
+    event: Event;
+    action: EventStatusAction;
+  } | null>(null);
 
   const filteredEvents = useMemo(() => {
     return initialEvents.filter((ev) => {
@@ -41,42 +42,6 @@ export function OrganizerEventsConsole({ initialEvents }: OrganizerEventsConsole
       return true;
     });
   }, [initialEvents, activeTab, searchQuery]);
-
-  const handlePublish = async (eventId: string) => {
-    setPublishingId(eventId);
-    try {
-      const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
-      const res = await fetch(`${SERVER_URL}/api/v1/events/publish/${eventId}`, {
-        method: "PATCH",
-        credentials: "include",
-      });
-
-      const json = await res.json();
-
-      if (!res.ok || !json.success) {
-        toast.add({
-          title: "Publish Failed",
-          description: json.message || "Failed to publish event.",
-        });
-        return;
-      }
-
-      toast.add({
-        title: "Event Published!",
-        description: "Your event is now live on the catalog board for seat reservations.",
-      });
-
-      router.refresh();
-    } catch (err) {
-      console.error("Publish error:", err);
-      toast.add({
-        title: "Network Error",
-        description: "Failed to connect to the server. Please try again.",
-      });
-    } finally {
-      setPublishingId(null);
-    }
-  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -236,7 +201,6 @@ export function OrganizerEventsConsole({ initialEvents }: OrganizerEventsConsole
             const booked = ev.bookedSeats || 0;
             const cap = ev.capacity || 1;
             const percent = Math.min(100, Math.round((booked / cap) * 100));
-            const isPublishing = publishingId === ev.id;
             const isDraft = ev.status === "DRAFT";
 
             return (
@@ -279,18 +243,23 @@ export function OrganizerEventsConsole({ initialEvents }: OrganizerEventsConsole
                       {isDraft && (
                         <Button
                           size="sm"
-                          disabled={isPublishing}
-                          onClick={() => handlePublish(ev.id)}
+                          onClick={() => setStatusDialogState({ event: ev, action: "PUBLISH" })}
                           className="rounded-full text-xs font-bold px-4"
                         >
-                          {isPublishing ? (
-                            <Loader2 className="size-3.5 animate-spin" />
-                          ) : (
-                            <>
-                              <Sparkles className="mr-1.5 size-3.5" />
-                              Go Live
-                            </>
-                          )}
+                          <Sparkles className="mr-1.5 size-3.5" />
+                          Go Live
+                        </Button>
+                      )}
+
+                      {(isDraft || ev.status === "PUBLISHED") && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setStatusDialogState({ event: ev, action: "CANCEL" })}
+                          className="rounded-full text-xs font-semibold gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30"
+                        >
+                          <Ban className="size-3.5" />
+                          <span>Cancel Event</span>
                         </Button>
                       )}
 
@@ -351,6 +320,16 @@ export function OrganizerEventsConsole({ initialEvents }: OrganizerEventsConsole
             );
           })}
         </div>
+      )}
+
+      {/* Status Action Confirmation Modal */}
+      {statusDialogState && (
+        <EventStatusDialog
+          event={statusDialogState.event}
+          action={statusDialogState.action}
+          isOpen={true}
+          onClose={() => setStatusDialogState(null)}
+        />
       )}
 
     </div>
