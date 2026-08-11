@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Star,
@@ -10,11 +11,13 @@ import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
+  ShieldCheck,
 } from "lucide-react";
-import type { Event, Review } from "@/lib/types";
+import type { Event, Review, Booking } from "@/lib/types";
 import { useSession } from "@/lib/auth-client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/toast";
 import { formatDate } from "@/lib/utils";
 
 interface EventReviewsSectionProps {
@@ -52,7 +55,55 @@ export function EventReviewsSection({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
+  const [hasConfirmedBooking, setHasConfirmedBooking] = useState<boolean | null>(null);
+
   const isCompleted = event.status === "COMPLETED";
+  const currentUserId = session?.user?.id;
+  const userHasReviewed = currentUserId
+    ? reviewsList.some((r) => r.userId === currentUserId || r.user?.id === currentUserId)
+    : false;
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const checkEligibility = async () => {
+      if (!currentUserId || !event.id) {
+        if (isMounted) setHasConfirmedBooking(false);
+        return;
+      }
+
+      try {
+        const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
+        const res = await fetch(`${SERVER_URL}/api/v1/bookings/user/${currentUserId}`, {
+          credentials: "include",
+        });
+
+        if (!res.ok) {
+          if (isMounted) setHasConfirmedBooking(false);
+          return;
+        }
+
+        const json = await res.json();
+        const rawBookings: Booking[] =
+          json?.data?.bookings || json?.data?.items || json?.data || [];
+
+        const confirmed = rawBookings.some(
+          (b) => b.eventId === event.id && b.status === "CONFIRMED"
+        );
+
+        if (isMounted) setHasConfirmedBooking(confirmed);
+      } catch (err) {
+        console.error("Failed to check booking eligibility:", err);
+        if (isMounted) setHasConfirmedBooking(false);
+      }
+    };
+
+    checkEligibility();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentUserId, event.id]);
 
   const handleFetchPage = async (page: number) => {
     if (page < 1 || page > totalPages || isLoadingPage) return;
@@ -119,11 +170,19 @@ export function EventReviewsSection({
       const json = await res.json();
 
       if (!res.ok || !json.success) {
-        setSubmitError(
-          json.message || "Failed to submit review. Check eligibility."
-        );
+        const msg = json.message || "Failed to submit review. Check eligibility.";
+        setSubmitError(msg);
+        toast.add({
+          title: "Submission Error",
+          description: msg,
+        });
         return;
       }
+
+      toast.add({
+        title: "Review Submitted!",
+        description: "Thank you for sharing your verified attendee feedback.",
+      });
 
       setSubmitSuccess(true);
       setIsWriting(false);
@@ -133,7 +192,12 @@ export function EventReviewsSection({
       handleFetchPage(1);
     } catch (err) {
       console.error("Error submitting review:", err);
-      setSubmitError("Network error occurred. Please try again.");
+      const msg = "Network error occurred. Please try again.";
+      setSubmitError(msg);
+      toast.add({
+        title: "Network Error",
+        description: msg,
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -155,16 +219,44 @@ export function EventReviewsSection({
           </p>
         </div>
 
-        {session && !isWriting && !submitSuccess && (
-          <Button
-            size="sm"
-            onClick={() => setIsWriting(true)}
-            className="rounded-full text-xs font-semibold self-start sm:self-auto"
-          >
-            <MessageSquare className="mr-1.5 size-3.5" />
-            Write a Review
-          </Button>
-        )}
+        {/* Gated Review Action Button */}
+        <div>
+          {!session ? (
+            <Button
+              render={<Link href={`/sign-in?redirect=/events/${event.id}`} />}
+              nativeButton={false}
+              size="sm"
+              variant="outline"
+              className="rounded-full text-xs font-semibold"
+            >
+              Sign in to Review
+            </Button>
+          ) : !isCompleted ? (
+            <span className="font-mono text-xs text-muted-foreground px-3 py-1.5 rounded-full border border-border/60 bg-muted/30">
+              Reviews open when COMPLETED
+            </span>
+          ) : userHasReviewed ? (
+            <span className="font-mono text-xs text-emerald-600 dark:text-emerald-400 font-semibold px-3 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 flex items-center gap-1.5">
+              <CheckCircle2 className="size-3.5" />
+              You reviewed this event
+            </span>
+          ) : hasConfirmedBooking === false ? (
+            <span className="font-mono text-xs text-amber-600 dark:text-amber-400 font-semibold px-3 py-1.5 rounded-full border border-amber-500/30 bg-amber-500/10">
+              Confirmed tickets required
+            </span>
+          ) : (
+            !isWriting && !submitSuccess && (
+              <Button
+                size="sm"
+                onClick={() => setIsWriting(true)}
+                className="rounded-full text-xs font-semibold self-start sm:self-auto"
+              >
+                <MessageSquare className="mr-1.5 size-3.5" />
+                Write a Review
+              </Button>
+            )
+          )}
+        </div>
       </div>
 
       {/* Summary Score Box */}
@@ -198,10 +290,18 @@ export function EventReviewsSection({
                 Reviews open once an event is marked <strong>COMPLETED</strong>. Confirmed ticket holders can submit feedback after attending.
               </span>
             </div>
+          ) : hasConfirmedBooking === false ? (
+            <div className="flex items-start gap-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-400">
+              <AlertCircle className="size-4 shrink-0 text-amber-500 mt-0.5" />
+              <span>
+                Only attendees with a <strong>CONFIRMED</strong> ticket booking can write a review for this completed event.
+              </span>
+            </div>
           ) : (
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Reviews are verified and submitted exclusively by confirmed attendees who completed this event.
-            </p>
+            <div className="flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400 font-mono">
+              <ShieldCheck className="size-4 shrink-0" />
+              <span>Verified attendee review access enabled.</span>
+            </div>
           )}
         </div>
       </div>
