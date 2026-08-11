@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+
 import { Compass, ChevronDown, Layers, Loader2, Sparkles } from "lucide-react";
 import type { Category } from "@/lib/types";
 import {
@@ -18,6 +18,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
+const DEFAULT_CATEGORIES: Category[] = [];
+
 interface CategoryNavProps {
   initialCategories?: Category[];
   className?: string;
@@ -25,27 +27,33 @@ interface CategoryNavProps {
 }
 
 export function CategoryNav({
-  initialCategories = [],
+  initialCategories = DEFAULT_CATEGORIES,
   className,
   variant = "dropdown",
 }: CategoryNavProps) {
-  const pathname = usePathname();
-  const [categories, setCategories] = useState<Category[]>(initialCategories);
-  const [loading, setLoading] = useState(initialCategories.length === 0);
+  const needsFetch = initialCategories.length === 0;
+  const [fetchedCategories, setFetchedCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(needsFetch);
+
+  const categories = needsFetch ? fetchedCategories : initialCategories;
 
   useEffect(() => {
-    if (initialCategories.length > 0) return;
+    if (!needsFetch) return;
 
     let isMounted = true;
-    const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
+    const SERVER_URL =
+      process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
 
     fetch(`${SERVER_URL}/api/v1/categories/active?limit=30`)
       .then((res) => (res.ok ? res.json() : null))
       .then((json) => {
-        if (isMounted && json?.data?.categories) {
-          setCategories(json.data.categories);
-        } else if (isMounted && json?.data?.items) {
-          setCategories(json.data.items);
+        if (!isMounted) return;
+        if (json?.data?.categories) {
+          setFetchedCategories(json.data.categories);
+        } else if (json?.data?.items) {
+          setFetchedCategories(json.data.items);
+        } else if (Array.isArray(json?.data)) {
+          setFetchedCategories(json.data);
         }
       })
       .catch((err) => {
@@ -58,7 +66,8 @@ export function CategoryNav({
     return () => {
       isMounted = false;
     };
-  }, [initialCategories]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (variant === "list") {
     return (
@@ -69,30 +78,38 @@ export function CategoryNav({
         {loading ? (
           <div className="flex items-center gap-2 p-2 text-xs text-muted-foreground">
             <Loader2 className="size-3.5 animate-spin" />
-            <span>Loading rooms...</span>
+            <span>Loading categories...</span>
           </div>
         ) : categories.length === 0 ? (
-          <p className="p-2 text-xs text-muted-foreground">No active categories</p>
+          <p className="p-2 text-xs text-muted-foreground">
+            No active categories
+          </p>
         ) : (
-          categories.map((cat) => (
-            <Link
-              key={cat.id}
-              href={`/events?category=${cat.slug}`}
-              className={cn(
-                "flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors hover:bg-muted/80 hover:text-foreground",
-                pathname.includes(`category=${cat.slug}`)
-                  ? "bg-primary/10 text-primary font-semibold"
-                  : "text-muted-foreground"
-              )}
-            >
-              <span>{cat.name}</span>
-              {typeof cat._count?.events === "number" && (
-                <Badge variant="secondary" className="text-[10px] font-mono px-1.5 py-0">
-                  {cat._count.events}
-                </Badge>
-              )}
-            </Link>
-          ))
+          categories.map((cat) => {
+            const isActive = false;
+            return (
+              <Link
+                key={cat.id}
+                href={`/events?category=${cat.slug}`}
+                className={cn(
+                  "flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors hover:bg-muted/80 hover:text-foreground",
+                  isActive
+                    ? "bg-primary/10 text-primary font-semibold"
+                    : "text-muted-foreground",
+                )}
+              >
+                <span>{cat.name}</span>
+                {typeof cat._count?.events === "number" && (
+                  <Badge
+                    variant="secondary"
+                    className="text-[10px] font-mono px-1.5 py-0"
+                  >
+                    {cat._count.events}
+                  </Badge>
+                )}
+              </Link>
+            );
+          })
         )}
       </div>
     );
@@ -106,7 +123,7 @@ export function CategoryNav({
             variant="ghost"
             className={cn(
               "text-xs font-semibold transition-all duration-200 px-3 py-1.5 rounded-full select-none gap-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/50",
-              className
+              className,
             )}
           />
         }
