@@ -117,10 +117,12 @@ export function CategoryNav({
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="start" className="w-56 p-1.5" sideOffset={8}>
-        <DropdownMenuLabel className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground flex items-center justify-between px-2 py-1">
-          <span>Active Categories</span>
-          <Sparkles className="size-3 text-primary/70" />
-        </DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground flex items-center justify-between px-2 py-1">
+            <span>Active Categories</span>
+            <Sparkles className="size-3 text-primary/70" />
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator className="my-1" />
 
         <DropdownMenuGroup className="max-h-64 overflow-y-auto space-y-0.5">
