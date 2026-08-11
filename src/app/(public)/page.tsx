@@ -2,6 +2,7 @@ import { fetchActiveCategories, fetchActiveEvents } from "@/lib/api-server";
 import { HeroSection } from "@/components/sections/HeroSection";
 import { UpcomingEventsSection } from "@/components/sections/UpcomingEventsSection";
 import { CategoryShowcaseSection } from "@/components/sections/CategoryShowcaseSection";
+import { SocialProofSection } from "@/components/sections/SocialProofSection";
 import { HowItWorksSection } from "@/components/sections/HowItWorksSection";
 import { OrganizerCTASection } from "@/components/sections/OrganizerCTASection";
 
@@ -28,6 +29,7 @@ export default async function Home() {
         skipFeaturedId={featuredEvent?.id}
       />
       <CategoryShowcaseSection categories={categories} />
+      <SocialProofSection />
       <HowItWorksSection />
       <OrganizerCTASection />
     </div>
