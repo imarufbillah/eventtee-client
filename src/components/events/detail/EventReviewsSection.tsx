@@ -2,7 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Star, MessageSquare, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import {
+  Star,
+  MessageSquare,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import type { Event, Review } from "@/lib/types";
 import { useSession } from "@/lib/auth-client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -14,6 +22,8 @@ interface EventReviewsSectionProps {
   initialReviews?: Review[];
 }
 
+const REVIEWS_PER_PAGE = 5;
+
 export function EventReviewsSection({
   event,
   initialReviews = [],
@@ -21,9 +31,18 @@ export function EventReviewsSection({
   const router = useRouter();
   const { data: session } = useSession();
 
-  const reviewsList = event.reviews && event.reviews.length > 0 ? event.reviews : initialReviews;
+  const defaultList =
+    event.reviews && event.reviews.length > 0 ? event.reviews : initialReviews;
+
   const rating = event.averageRating ?? 0;
-  const totalCount = event.totalReviews ?? reviewsList.length;
+  const totalCount = event.totalReviews ?? defaultList.length;
+
+  const [reviewsList, setReviewsList] = useState<Review[]>(defaultList);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(
+    Math.ceil(totalCount / REVIEWS_PER_PAGE) || 1
+  );
+  const [isLoadingPage, setIsLoadingPage] = useState(false);
 
   const [isWriting, setIsWriting] = useState(false);
   const [selectedRating, setSelectedRating] = useState(5);
@@ -34,6 +53,41 @@ export function EventReviewsSection({
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
   const isCompleted = event.status === "COMPLETED";
+
+  const handleFetchPage = async (page: number) => {
+    if (page < 1 || page > totalPages || isLoadingPage) return;
+    setIsLoadingPage(true);
+
+    try {
+      const serverUrl =
+        process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
+
+      const res = await fetch(
+        `${serverUrl}/api/v1/events/${event.id}/reviews?page=${page}&limit=${REVIEWS_PER_PAGE}`
+      );
+
+      if (!res.ok) {
+        setIsLoadingPage(false);
+        return;
+      }
+
+      const json = await res.json();
+      const rawReviews =
+        json?.data?.reviews || json?.data?.items || json?.data;
+
+      if (Array.isArray(rawReviews)) {
+        setReviewsList(rawReviews);
+        setCurrentPage(page);
+        if (json?.data?.total) {
+          setTotalPages(Math.ceil(json.data.total / REVIEWS_PER_PAGE) || 1);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch reviews page:", err);
+    } finally {
+      setIsLoadingPage(false);
+    }
+  };
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,7 +120,7 @@ export function EventReviewsSection({
 
       if (!res.ok || !json.success) {
         setSubmitError(
-          json.message || "Failed to submit review. Check eligibility.",
+          json.message || "Failed to submit review. Check eligibility."
         );
         return;
       }
@@ -75,6 +129,8 @@ export function EventReviewsSection({
       setIsWriting(false);
       setComment("");
       router.refresh();
+      // Re-fetch page 1 to show the new review
+      handleFetchPage(1);
     } catch (err) {
       console.error("Error submitting review:", err);
       setSubmitError("Network error occurred. Please try again.");
@@ -92,7 +148,7 @@ export function EventReviewsSection({
             id="reviews-heading"
             className="font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl"
           >
-            Attendee Reviews & Ratings
+            Attendee Reviews &amp; Ratings
           </h2>
           <p className="font-mono text-xs text-muted-foreground mt-0.5">
             Verified feedback from attendees
@@ -245,7 +301,14 @@ export function EventReviewsSection({
       )}
 
       {/* Reviews Cards List */}
-      {reviewsList.length === 0 ? (
+      {isLoadingPage ? (
+        <div className="flex items-center justify-center py-12 rounded-xl border border-dashed border-border bg-card/20">
+          <Loader2 className="size-6 animate-spin text-primary" />
+          <span className="ml-2 text-xs font-mono text-muted-foreground">
+            Loading reviews page {currentPage}…
+          </span>
+        </div>
+      ) : reviewsList.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border bg-muted/20 px-6 py-12 text-center">
           <p className="font-display text-base font-bold text-foreground">
             No reviews yet
@@ -315,6 +378,56 @@ export function EventReviewsSection({
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between border-t border-border/60 pt-4 font-mono text-xs">
+          <p className="text-muted-foreground">
+            Page <span className="text-foreground font-bold">{currentPage}</span> of{" "}
+            <span className="text-foreground font-bold">{totalPages}</span>
+          </p>
+
+          <div className="flex items-center gap-1.5">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage <= 1 || isLoadingPage}
+              onClick={() => handleFetchPage(currentPage - 1)}
+              className="h-8 rounded-lg px-2.5 text-xs"
+            >
+              <ChevronLeft className="size-3.5 mr-1" />
+              <span>Previous</span>
+            </Button>
+
+            {Array.from({ length: totalPages }).map((_, i) => {
+              const p = i + 1;
+              return (
+                <Button
+                  key={p}
+                  variant={p === currentPage ? "default" : "outline"}
+                  size="sm"
+                  disabled={isLoadingPage}
+                  onClick={() => handleFetchPage(p)}
+                  className="size-8 rounded-lg p-0 text-xs font-bold"
+                >
+                  {p}
+                </Button>
+              );
+            })}
+
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage >= totalPages || isLoadingPage}
+              onClick={() => handleFetchPage(currentPage + 1)}
+              className="h-8 rounded-lg px-2.5 text-xs"
+            >
+              <span>Next</span>
+              <ChevronRight className="size-3.5 ml-1" />
+            </Button>
+          </div>
         </div>
       )}
     </section>
