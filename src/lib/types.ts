@@ -57,6 +57,7 @@ export interface Event {
 export interface Booking {
   id: string;
   seats: number;
+  seatsBooked?: number;
   totalPrice: number | string;
   status: BookingStatus;
   isDeleted?: boolean;
