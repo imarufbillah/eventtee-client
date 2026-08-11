@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useSession, signOut } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
+import { CategoryNav } from "@/components/categories/CategoryNav";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -169,6 +170,7 @@ export function Header() {
           <Link href="/events" className={getNavLinkClass("/events")}>
             Browse Events
           </Link>
+          <CategoryNav />
           {isOrganizer && (
             <Link
               href="/dashboard/events/new"
@@ -465,6 +467,9 @@ export function Header() {
                         <span className="size-2 rounded-full bg-primary" />
                       )}
                     </Link>
+                    <div className="pt-2 border-t border-border/40">
+                      <CategoryNav variant="list" />
+                    </div>
                   </nav>
 
                   {/* Account & Console Group */}
