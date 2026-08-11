@@ -18,6 +18,7 @@ import {
   User as UserIcon,
 } from "lucide-react";
 import { useSession, signOut } from "@/lib/auth-client";
+import { toast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { CategoryNav } from "@/components/categories/CategoryNav";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
@@ -76,6 +77,14 @@ export function Header() {
     }
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [mobileMenuOpen]);
+
+  const handleSignOut = () => {
+    signOut();
+    toast.add({
+      title: "Signed out",
+      description: "You have been signed out successfully.",
+    });
+  };
 
   const user = session?.user;
   const userRole = (user as Record<string, unknown> | undefined)?.role as
@@ -305,7 +314,7 @@ export function Header() {
                 {/* Sign Out Action */}
                 <DropdownMenuItem
                   variant="destructive"
-                  onClick={() => signOut()}
+                  onClick={handleSignOut}
                   className="cursor-pointer"
                 >
                   <LogOut className="size-4" />
@@ -556,7 +565,7 @@ export function Header() {
                             className="w-full justify-start gap-2.5 h-11 px-3.5 text-xs rounded-xl font-medium active:scale-[0.98]"
                             onClick={() => {
                               setMobileMenuOpen(false);
-                              signOut();
+                              handleSignOut();
                             }}
                           >
                             <LogOut className="size-4 text-destructive-foreground" />

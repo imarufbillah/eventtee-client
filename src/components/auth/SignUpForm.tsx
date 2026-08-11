@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2, AlertCircle, ArrowRight } from "lucide-react";
 import { signUp } from "@/lib/auth-client";
+import { toast } from "@/components/ui/toast";
 import { AuthHeader } from "./AuthHeader";
 import { RoleSelector } from "./RoleSelector";
 import { Input } from "@/components/ui/input";
@@ -62,12 +63,20 @@ export function SignUpForm({
       });
 
       if (result.error) {
-        setErrorMessage(
-          result.error.message || "Failed to create account. Please try again.",
-        );
+        const errorMsg = result.error.message || "Failed to create account. Please try again.";
+        setErrorMessage(errorMsg);
+        toast.add({
+          title: "Sign up failed",
+          description: errorMsg,
+        });
         setIsSubmitting(false);
         return;
       }
+
+      toast.add({
+        title: "Account created!",
+        description: `Welcome to Eventtee as ${role === "ORGANIZER" ? "an Event Host" : "an Attendee"}.`,
+      });
 
       // Successful registration & auto session log-in
       const destination =

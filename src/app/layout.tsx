@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Outfit } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/toast";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 
@@ -51,6 +52,7 @@ export default function RootLayout({
             <Header />
             <main className="flex-1">{children}</main>
             <Footer />
+            <Toaster />
           </TooltipProvider>
         </ThemeProvider>
       </body>

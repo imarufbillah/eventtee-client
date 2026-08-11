@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2, AlertCircle, ArrowRight } from "lucide-react";
 import { signIn } from "@/lib/auth-client";
+import { toast } from "@/components/ui/toast";
 import { AuthHeader } from "./AuthHeader";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -47,12 +48,20 @@ export function SignInForm({ redirectUrl }: SignInFormProps) {
       });
 
       if (result?.error) {
-        setErrorMessage(
-          result.error.message || "Invalid email address or password.",
-        );
+        const errorMsg = result.error.message || "Invalid email address or password.";
+        setErrorMessage(errorMsg);
+        toast.add({
+          title: "Sign in failed",
+          description: errorMsg,
+        });
         setIsSubmitting(false);
         return;
       }
+
+      toast.add({
+        title: "Welcome back!",
+        description: "You have signed in successfully.",
+      });
 
       // Successful authentication -> navigate to redirect URL or default catalog
       const destination = redirectUrl || "/events";
