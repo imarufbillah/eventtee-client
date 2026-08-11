@@ -96,6 +96,7 @@ export interface PaginatedResponse<T> {
   page: number;
   limit: number;
   totalPages: number;
+  error?: boolean;
 }
 
 export interface ApiResponse<T> {

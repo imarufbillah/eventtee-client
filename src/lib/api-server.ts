@@ -14,6 +14,7 @@ export async function fetchActiveEvents(params?: {
     page: params?.page || 1,
     limit: params?.limit || 6,
     totalPages: 0,
+    error: true,
   };
 
   try {
@@ -48,6 +49,7 @@ export async function fetchActiveEvents(params?: {
         page,
         limit,
         totalPages: Math.ceil(total / limit) || 1,
+        error: false,
       };
     }
 
@@ -68,6 +70,7 @@ export async function fetchActiveCategories(params?: {
     page: params?.page || 1,
     limit: params?.limit || 20,
     totalPages: 0,
+    error: true,
   };
 
   try {
@@ -100,6 +103,7 @@ export async function fetchActiveCategories(params?: {
         page,
         limit,
         totalPages: Math.ceil(total / limit) || 1,
+        error: false,
       };
     }
 

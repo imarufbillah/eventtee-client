@@ -73,13 +73,7 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
     }),
   ]);
 
-  // Detect a fetch error: the utility returns an empty fallback on error.
-  // We treat it as an error only when the fetch truly failed (total 0 + empty
-  // items after a real request), which is indistinguishable from a genuine
-  // empty catalog in the current utility shape. We surface the error state
-  // only when the API itself returned a non-ok response; the utility logs it
-  // and returns the fallback. Future: extend PaginatedResponse with `error?`.
-  const fetchError = false; // see plan note — requires api-server.ts update to distinguish
+  const fetchError = Boolean(eventsData.error);
 
   return (
     <div className="flex min-h-dvh flex-col pt-16">
