@@ -19,6 +19,7 @@ export interface Category {
   id: string;
   name: string;
   slug: string;
+  description?: string | null;
   isDeleted?: boolean;
   createdAt?: string;
   updatedAt?: string;
